@@ -1,0 +1,41 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Enchant-Addon [Поведение]",
+    "description": "Система маны, манакамней и зачарований для Minecraft Bedrock 1.21.x (указана версия 26.60). Требуется эксперимент «Скрипты».",
+    "uuid": "5ca863f5-b120-4815-b777-e46f5790a76d",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      16,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "ea5ca44b-f447-4ad9-b9e8-a7eadc683493",
+      "version": [
+        1,
+        0,
+        0
+      ],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_type": "resources",
+      "uuid": "a2f86ab8-4b57-40b1-a733-d28bbd562668",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

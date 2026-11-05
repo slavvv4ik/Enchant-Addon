@@ -1,0 +1,104 @@
+{
+  "aquams": {
+    "textures": "textures/items/aquams"
+  },
+  "banems": {
+    "textures": "textures/items/banems"
+  },
+  "blast_protectionms": {
+    "textures": "textures/items/blast_protectionms"
+  },
+  "depthstriderms": {
+    "textures": "textures/items/depthstriderms"
+  },
+  "efficiencyms": {
+    "textures": "textures/items/efficiencyms"
+  },
+  "featherfallingms": {
+    "textures": "textures/items/featherfallingms"
+  },
+  "fire_aspectms": {
+    "textures": "textures/items/fire_aspectms"
+  },
+  "fire_protectionms": {
+    "textures": "textures/items/fire_protectionms"
+  },
+  "flamems": {
+    "textures": "textures/items/flamems"
+  },
+  "fortunems": {
+    "textures": "textures/items/fortunems"
+  },
+  "frostwalkerms": {
+    "textures": "textures/items/frostwalkerms"
+  },
+  "infinityms": {
+    "textures": "textures/items/infinityms"
+  },
+  "knockbackms": {
+    "textures": "textures/items/knockbackms"
+  },
+  "lootingms": {
+    "textures": "textures/items/lootingms"
+  },
+  "luckoftheseams": {
+    "textures": "textures/items/luckoftheseams"
+  },
+  "lurems": {
+    "textures": "textures/items/lurems"
+  },
+  "mendingms": {
+    "textures": "textures/items/mendingms"
+  },
+  "multishotms": {
+    "textures": "textures/items/multishotms"
+  },
+  "powerms": {
+    "textures": "textures/items/powerms"
+  },
+  "projectileprotectionms": {
+    "textures": "textures/items/projectileprotectionms"
+  },
+  "protectionms": {
+    "textures": "textures/items/protectionms"
+  },
+  "punchms": {
+    "textures": "textures/items/punchms"
+  },
+  "quickchargems": {
+    "textures": "textures/items/quickchargems"
+  },
+  "respirationms": {
+    "textures": "textures/items/respirationms"
+  },
+  "sharpnessms": {
+    "textures": "textures/items/sharpnessms"
+  },
+  "silktouchms": {
+    "textures": "textures/items/silktouchms"
+  },
+  "smitems": {
+    "textures": "textures/items/smitems"
+  },
+  "swift_sneakms": {
+    "textures": "textures/items/swift_sneakms"
+  },
+  "thornsms": {
+    "textures": "textures/items/thornsms"
+  },
+  "unbreakingms": {
+    "textures": "textures/items/unbreakingms"
+  },
+  "manastone": {
+    "textures": "textures/items/manastone"
+  },
+  "fullmanastone": {
+    "textures": "textures/items/fullmanastone"
+  },
+  "mana_potion": {
+    "textures": "textures/items/mana_potion"
+  },
+  "mana_regen_potion": {
+    "textures": "textures/items/mana_regen_potion"
+  }
+}

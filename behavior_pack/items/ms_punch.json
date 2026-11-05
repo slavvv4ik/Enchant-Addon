@@ -1,0 +1,20 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "enchant_addon:ms_punch",
+      "category": "items"
+    },
+    "components": {
+      "minecraft:icon": "punchms",
+      "minecraft:display_name": {
+        "value": "Манакамень(Откидывание)"
+      },
+      "minecraft:stacked_by_data": false,
+      "minecraft:stack_size": 64,
+      "minecraft:creative_category": {
+        "category": "items"
+      }
+    }
+  }
+}

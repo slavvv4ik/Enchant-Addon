@@ -1,0 +1,11 @@
+{
+  "mana_condenser": {
+    "textures": "textures/blocks/mana_condenser"
+  },
+  "mana_anvil": {
+    "textures": "textures/blocks/mana_anvil"
+  },
+  "msmerge_block": {
+    "textures": "textures/blocks/msmerge_block"
+  }
+}

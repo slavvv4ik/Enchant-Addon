@@ -1,0 +1,20 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "enchant_addon:ms_multishot",
+      "category": "items"
+    },
+    "components": {
+      "minecraft:icon": "multishotms",
+      "minecraft:display_name": {
+        "value": "Манакамень(Тройной выстрел)"
+      },
+      "minecraft:stacked_by_data": false,
+      "minecraft:stack_size": 64,
+      "minecraft:creative_category": {
+        "category": "items"
+      }
+    }
+  }
+}

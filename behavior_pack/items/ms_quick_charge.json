@@ -1,0 +1,20 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "enchant_addon:ms_quick_charge",
+      "category": "items"
+    },
+    "components": {
+      "minecraft:icon": "quickchargems",
+      "minecraft:display_name": {
+        "value": "Манакамень(Быстрая перезарядка)"
+      },
+      "minecraft:stacked_by_data": false,
+      "minecraft:stack_size": 64,
+      "minecraft:creative_category": {
+        "category": "items"
+      }
+    }
+  }
+}

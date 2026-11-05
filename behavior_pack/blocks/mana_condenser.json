@@ -1,0 +1,26 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:block": {
+    "description": {
+      "identifier": "enchant_addon:mana_condenser",
+      "menu_category": {
+        "category": "construction",
+        "group": "item_group.name.building_blocks"
+      }
+    },
+    "components": {
+      "minecraft:destroy_time": 2.5,
+      "minecraft:explosion_resistance": 10.0,
+      "minecraft:friction": 0.6,
+      "minecraft:geometry": "geometry.mana_condenser",
+      "minecraft:map_color": "#4a4a4a",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "mana_condenser",
+          "render_method": "opaque",
+          "face_dimming": true
+        }
+      }
+    }
+  }
+}

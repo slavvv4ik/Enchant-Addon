@@ -1,0 +1,20 @@
+{
+  "format_version": "1.16.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "enchant_addon:ms_infinity",
+      "category": "items"
+    },
+    "components": {
+      "minecraft:icon": "infinityms",
+      "minecraft:display_name": {
+        "value": "Манакамень(Бесконечность)"
+      },
+      "minecraft:stacked_by_data": false,
+      "minecraft:stack_size": 64,
+      "minecraft:creative_category": {
+        "category": "items"
+      }
+    }
+  }
+}

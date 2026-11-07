@@ -14,6 +14,15 @@ const DISPLAY_MACHINE_KEY = "mana:display_machine";
 const DISPLAY_SLOT_KEY = "mana:display_slot";
 const DISPLAY_VERSION_KEY = "mana:display_version";
 const DISPLAY_LAYOUT_VERSION = 2;
+// Полоса маны в HUD (RP ui/hud_screen.json) не имеет доступа к скриптовым данным:
+// единственный канал, который читает JSON UI — это строка заголовка
+// (#hud_title_text_string). Значение передаём маркером "MM:<0..1000>",
+// при активном восстановлении прибавляем MANA_BAR_REGEN_OFFSET.
+// Сам заголовок скрываем в RP, если строка начинается с маркера.
+const MANA_BAR_MARK = "MM:";
+const MANA_BAR_REGEN_OFFSET = 10000;
+const MANA_BAR_STAY_TICKS = 72000;
+const MANA_BAR_HEARTBEAT = 60;
 const MACHINE_IDS = new Set(["mana:condenser", "mana:anvil", "mana:fusion"]);
 const MACHINE_COMPONENT_ID = "mana:machine_interaction";
 const FULL_STONE = "mana:full_manastone";
@@ -74,6 +83,7 @@ let machinesLoaded = false;
 let lootSeen = new Set();
 let lootSeenLoaded = false;
 const pendingDropChecks = new Set();
+const manaBarPublished = new Map();
 const interactionCooldowns = new Map();
 
 function loadMachines() {
@@ -261,6 +271,29 @@ function showError(player, message) {
   player.setDynamicProperty(ERROR_KEY, message);
   player.setDynamicProperty(ERROR_TICKS_KEY, 40);
   player.playSound("note.bass");
+}
+
+// Значение для полоски маны: 0..1000 — доля маны, +10000 — идёт ускоренное
+// восстановление (полоса рисуется другой текстурой).
+function manaBarValue(player) {
+  const ratio = Math.round((getMana(player) / MAX_MANA) * 1000);
+  const regen = Number(player.getDynamicProperty(REGEN_KEY) || 0) > 0 ? MANA_BAR_REGEN_OFFSET : 0;
+  return Math.max(0, Math.min(1000, ratio)) + regen;
+}
+
+function publishManaBar(player, force = false) {
+  const value = manaBarValue(player);
+  if (!force && manaBarPublished.get(player.id) === value) return;
+  // Карта растёт только от числа разных значений, но всё равно подчищаем её.
+  if (manaBarPublished.size > 256) manaBarPublished.clear();
+  manaBarPublished.set(player.id, value);
+  try {
+    player.onScreenDisplay.setTitle(`${MANA_BAR_MARK}${value}`, {
+      fadeInDuration: 0, stayDuration: MANA_BAR_STAY_TICKS, fadeOutDuration: 0
+    });
+  } catch (error) {
+    console.warn(`[Mana Machines] Не удалось обновить полосу маны: ${error}`);
+  }
 }
 
 function showSuccess(player) {
@@ -653,6 +686,9 @@ function tickPlayers() {
       const indicator = regenTicks > 0 ? " §d✦" : "";
       player.onScreenDisplay.setActionBar(`§b${getMana(player)}/${MAX_MANA}${indicator}`);
     }
+    // Значение публикуем только при изменении; раз в MANA_BAR_HEARTBEAT тиков
+    // шлём принудительно, если движок успел очистить строку заголовка.
+    publishManaBar(player, system.currentTick % MANA_BAR_HEARTBEAT === 0);
   }
 }
 

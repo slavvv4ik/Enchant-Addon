@@ -197,8 +197,13 @@ const player = {
   setDynamicProperty(key, value) { playerProps.set(key, value); },
   addLevels(amount) { this.level += amount; return this.level; },
   playSound() {},
-  onScreenDisplay: { setActionBar() {} }
+  onScreenDisplay: {
+    setActionBar() {},
+    setTitle(text, options) { titles.push({ text, options }); }
+  }
 };
+
+const titles = [];
 
 const world = {
   afterEvents,
@@ -453,5 +458,54 @@ assert.equal(displays[0].getDynamicProperty("mana:display_version"), 2, "display
 const pickupEvent = { item: displays[0], cancel: false };
 beforeEvents.entityItemPickup.emit(pickupEvent);
 assert.equal(pickupEvent.cancel, true, "display item cannot be picked up");
+
+// --- Полоса маны в HUD ---
+// Канал данных для JSON UI — строка заголовка: UI читает #hud_title_text_string,
+// поэтому скрипт обязан публиковать значение ровно с тем же маркером.
+const rp = path.join(root, "src", "Mana_Machines_RP");
+const hud = JSON.parse(fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8"));
+assert.equal(hud.namespace, "mana_machines", "hud file uses its own namespace");
+assert.deepEqual(hud.mana_bar_panel.size, [182, 5], "mana bar matches the vanilla xp bar size");
+assert.ok(hud.root_panel.modifications[0].value[0]["mana_bar_panel@mana_machines.mana_bar_panel"],
+  "mana bar is merged into the root panel");
+assert.ok(hud.mana_bar_fill.bindings.some((entry) => entry.target_property_name === "#clip_ratio"),
+  "fill image is clipped by the published ratio");
+assert.ok(hud["mana_bar_fill_regen@mana_machines.mana_bar_fill"], "regen variant of the fill exists");
+assert.equal(hud.mana_bar_fill.texture, "textures/ui/mana_bar_fill");
+for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
+  const data = fs.readFileSync(path.join(rp, "textures", "ui", `${name}.png`));
+  assert.equal(data.readUInt32BE(16), 182, `${name}.png is 182 px wide`);
+  assert.equal(data.readUInt32BE(20), 5, `${name}.png is 5 px tall`);
+}
+// Наш служебный заголовок не должен быть виден игроку.
+const titleMod = hud["hud_title_text/title_frame/title"].modifications[0];
+assert.equal(titleMod.value.target_property_name, "#visible", "service title is hidden from the player");
+assert.ok(source.includes('"MM:"'), "script and UI use the same marker");
+
+titles.length = 0;
+playerProps.set("mana:value", 500);
+playerProps.set("mana:regen_ticks", 0);
+context.publishManaBar(player, true);
+assert.equal(titles.at(-1).text, "MM:500", "half of the mana is published as 500/1000");
+
+playerProps.set("mana:regen_ticks", 120);
+context.publishManaBar(player, true);
+assert.equal(titles.at(-1).text, "MM:10500", "regen flag is encoded in the same number");
+
+const publishedCount = titles.length;
+context.publishManaBar(player, false);
+assert.equal(titles.length, publishedCount, "unchanged value is not republished every tick");
+
+playerProps.set("mana:value", 1000);
+context.publishManaBar(player, false);
+assert.equal(titles.at(-1).text, "MM:11000", "changed value is republished");
+
+titles.length = 0;
+playerProps.set("mana:value", 250);
+playerProps.set("mana:regen_ticks", 0);
+context.tickPlayers();
+const published = titles.map((entry) => entry.text).filter((text) => text.startsWith("MM:"));
+assert.equal(published.length, 1, "player tick publishes the bar value once");
+assert.equal(published[0], "MM:250", "player tick publishes the current mana");
 
 console.log("runtime-smoke: OK");

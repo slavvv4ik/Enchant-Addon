@@ -464,14 +464,58 @@ assert.equal(pickupEvent.cancel, true, "display item cannot be picked up");
 // поэтому скрипт обязан публиковать значение ровно с тем же маркером.
 const rp = path.join(root, "src", "Mana_Machines_RP");
 const hud = JSON.parse(fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8"));
-assert.equal(hud.namespace, "mana_machines", "hud file uses its own namespace");
-assert.deepEqual(hud.mana_bar_panel.size, [182, 5], "mana bar matches the vanilla xp bar size");
-assert.ok(hud.root_panel.modifications[0].value[0]["mana_bar_panel@mana_machines.mana_bar_panel"],
-  "mana bar is merged into the root panel");
-assert.ok(hud.mana_bar_fill.bindings.some((entry) => entry.target_property_name === "#clip_ratio"),
-  "fill image is clipped by the published ratio");
-assert.ok(hud["mana_bar_fill_regen@mana_machines.mana_bar_fill"], "regen variant of the fill exists");
-assert.equal(hud.mana_bar_fill.texture, "textures/ui/mana_bar_fill");
+const hudText = fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8");
+// Регрессия: собственный namespace в merge-файле ломает вставку в ванильный
+// root_panel, а $-переменные не раскрываются в поддеревьях из modifications.
+assert.equal(hud.namespace, undefined, "hud merge file must not declare its own namespace");
+assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
+
+// Полоса привязана к ванильной группе опыта: обычной и карманной раскладки.
+function findControl(node, name) {
+  if (!node || typeof node !== "object") return null;
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const found = findControl(item, name);
+      if (found) return found;
+    }
+    return null;
+  }
+  for (const [key, value] of Object.entries(node)) {
+    if (key === name && value && typeof value === "object" && value.type) return value;
+    const found = findControl(value, name);
+    if (found) return found;
+  }
+  return null;
+}
+
+for (const target of [
+  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar",
+  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"
+]) {
+  const modification = hud[target]?.modifications?.[0];
+  assert.ok(modification, `${target} is modified`);
+  assert.equal(modification.array_name, "controls");
+  assert.equal(modification.operation, "insert_back");
+  const panel = modification.value[0].mana_bar_panel;
+  assert.ok(panel, `${target} inserts the mana bar panel`);
+  assert.equal(panel.type, "panel");
+  assert.equal(panel.anchor_from, "bottom_middle", `${target}: bar is anchored above the xp strip`);
+  assert.equal(panel.anchor_to, "top_middle");
+}
+
+const barPanel = hud["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar"]
+  .modifications[0].value[0].mana_bar_panel;
+const barFill = findControl(barPanel, "mana_bar_fill");
+assert.ok(barFill, "fill image is defined inline");
+assert.equal(barFill.clip_direction, "left");
+assert.ok(barFill.bindings.some((entry) => entry.binding_name === "#hud_title_text_string"),
+  "fill reads the title channel");
+assert.ok(barFill.bindings.some((entry) => entry.target_property_name === "#clip_ratio"),
+  "fill is clipped by the published ratio");
+assert.ok(barFill.bindings.some((entry) => String(entry.source_property_name).includes("'MM:'")),
+  "fill strips the service marker from the title string");
+
 for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
   const data = fs.readFileSync(path.join(rp, "textures", "ui", `${name}.png`));
   assert.equal(data.readUInt32BE(16), 182, `${name}.png is 182 px wide`);

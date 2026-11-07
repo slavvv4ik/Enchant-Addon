@@ -1,114 +1,337 @@
 {
-  "namespace": "mana_machines",
-
-  "mana_bar_empty": {
-    "type": "image",
-    "texture": "textures/ui/mana_bar_empty",
-    "nineslice_size": [1, 1, 1, 1]
-  },
-
-  "mana_bar_fill": {
-    "type": "image",
-    "texture": "textures/ui/mana_bar_fill",
-    "nineslice_size": [1, 1, 1, 1],
-    "clip_direction": "left",
-    "clip_pixelperfect": false,
-    "bindings": [
-      {
-        "binding_name": "#hud_title_text_string",
-        "binding_name_override": "#mana_raw",
-        "binding_type": "global"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "((#mana_raw - 'MM:') + 0)",
-        "target_property_name": "#mana_value"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "(#mana_value / 1000)",
-        "target_property_name": "#clip_ratio"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "(not (#mana_value > 5000))",
-        "target_property_name": "#visible"
-      }
-    ]
-  },
-
-  "mana_bar_fill_regen@mana_machines.mana_bar_fill": {
-    "texture": "textures/ui/mana_bar_fill_regen",
-    "bindings": [
-      {
-        "binding_name": "#hud_title_text_string",
-        "binding_name_override": "#mana_raw",
-        "binding_type": "global"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "((#mana_raw - 'MM:') + 0)",
-        "target_property_name": "#mana_value"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "((#mana_value - 10000) / 1000)",
-        "target_property_name": "#clip_ratio"
-      },
-      {
-        "binding_type": "view",
-        "source_property_name": "(#mana_value > 5000)",
-        "target_property_name": "#visible"
-      }
-    ]
-  },
-
-  "mana_bar_panel": {
-    "type": "panel",
-    "$mana_bar_offset|default": [0, -46],
-    "size": [182, 5],
-    "anchor_from": "bottom_middle",
-    "anchor_to": "bottom_middle",
-    "offset": "$mana_bar_offset",
-    "layer": 6,
-    "controls": [
-      {
-        "mana_bar_empty@mana_machines.mana_bar_empty": {
-          "size": ["100%", "100%"],
-          "layer": 1,
-          "controls": [
-            {
-              "mana_bar_fill@mana_machines.mana_bar_fill": {
-                "size": ["100%", "100%"],
-                "layer": 2
-              }
-            },
-            {
-              "mana_bar_fill_regen@mana_machines.mana_bar_fill_regen": {
-                "size": ["100%", "100%"],
-                "layer": 3
-              }
-            }
-          ]
-        }
-      }
-    ]
-  },
-
-  "root_panel": {
+  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar": {
     "modifications": [
       {
         "array_name": "controls",
         "operation": "insert_back",
         "value": [
           {
-            "mana_bar_panel@mana_machines.mana_bar_panel": {}
+            "mana_bar_panel": {
+              "type": "panel",
+              "size": [
+                "100%",
+                5
+              ],
+              "anchor_from": "bottom_middle",
+              "anchor_to": "top_middle",
+              "offset": [
+                0,
+                -2
+              ],
+              "layer": 8,
+              "controls": [
+                {
+                  "mana_bar_empty": {
+                    "type": "image",
+                    "texture": "textures/ui/mana_bar_empty",
+                    "size": [
+                      "100%",
+                      "100%"
+                    ],
+                    "layer": 1,
+                    "controls": [
+                      {
+                        "mana_bar_fill": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(not (#mana_value > 5000))",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "mana_bar_fill_regen": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill_regen",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "((#mana_value - 10000) / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value > 5000)",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
           }
         ]
       }
     ]
   },
-
+  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_back",
+        "value": [
+          {
+            "mana_bar_panel": {
+              "type": "panel",
+              "size": [
+                "100%",
+                5
+              ],
+              "anchor_from": "bottom_middle",
+              "anchor_to": "top_middle",
+              "offset": [
+                0,
+                -2
+              ],
+              "layer": 8,
+              "controls": [
+                {
+                  "mana_bar_empty": {
+                    "type": "image",
+                    "texture": "textures/ui/mana_bar_empty",
+                    "size": [
+                      "100%",
+                      "100%"
+                    ],
+                    "layer": 1,
+                    "controls": [
+                      {
+                        "mana_bar_fill": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(not (#mana_value > 5000))",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "mana_bar_fill_regen": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill_regen",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "((#mana_value - 10000) / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value > 5000)",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_back",
+        "value": [
+          {
+            "mana_bar_panel": {
+              "type": "panel",
+              "size": [
+                "100%",
+                5
+              ],
+              "anchor_from": "bottom_middle",
+              "anchor_to": "top_middle",
+              "offset": [
+                0,
+                -2
+              ],
+              "layer": 8,
+              "controls": [
+                {
+                  "mana_bar_empty": {
+                    "type": "image",
+                    "texture": "textures/ui/mana_bar_empty",
+                    "size": [
+                      "100%",
+                      "100%"
+                    ],
+                    "layer": 1,
+                    "controls": [
+                      {
+                        "mana_bar_fill": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(not (#mana_value > 5000))",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "mana_bar_fill_regen": {
+                          "type": "image",
+                          "texture": "textures/ui/mana_bar_fill_regen",
+                          "size": [
+                            "100%",
+                            "100%"
+                          ],
+                          "clip_direction": "left",
+                          "clip_pixelperfect": false,
+                          "layer": 2,
+                          "bindings": [
+                            {
+                              "binding_name": "#hud_title_text_string",
+                              "binding_name_override": "#mana_raw",
+                              "binding_type": "global"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_raw - 'MM:') + 0",
+                              "target_property_name": "#mana_value"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "((#mana_value - 10000) / 1000)",
+                              "target_property_name": "#clip_ratio"
+                            },
+                            {
+                              "binding_type": "view",
+                              "source_property_name": "(#mana_value > 5000)",
+                              "target_property_name": "#visible"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
   "hud_title_text/title_frame/title": {
     "modifications": [
       {
@@ -122,7 +345,6 @@
       }
     ]
   },
-
   "hud_title_text/title_frame/title_background": {
     "modifications": [
       {

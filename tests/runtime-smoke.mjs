@@ -197,8 +197,14 @@ const player = {
   setDynamicProperty(key, value) { playerProps.set(key, value); },
   addLevels(amount) { this.level += amount; return this.level; },
   playSound() {},
-  onScreenDisplay: { setActionBar() {} }
+  onScreenDisplay: {
+    setActionBar(text) { actionBars.push(text); },
+    setTitle(text, options) { titles.push({ text, options }); }
+  }
 };
+
+const titles = [];
+const actionBars = [];
 
 const world = {
   afterEvents,
@@ -255,6 +261,18 @@ for (const name of ["anvil", "condenser", "fusion"]) {
   const block = JSON.parse(fs.readFileSync(path.join(bp, "blocks", `${name}.json`), "utf8"));
   assert.ok(block.format_version >= "1.21.90", `${name} format supports custom components V2`);
   assert.ok(block["minecraft:block"].components["mana:machine_interaction"], `${name} binds interaction component`);
+  // Регрессия: без ключа tile.<namespace>:<блок>.name в руках блок назывался
+  // сырой строкой вида "tile....", а переводы лежали с ключами через точки.
+  const blockId = block["minecraft:block"].description.identifier;
+  const nameKey = `tile.${blockId}.name`;
+  assert.equal(block["minecraft:block"].components["minecraft:display_name"], nameKey,
+    `${blockId} points at its lang key`);
+  for (const language of ["en_US", "ru_RU"]) {
+    const lang = fs.readFileSync(path.join(root, "src", "Mana_Machines_RP", "texts", `${language}.lang`), "utf8");
+    const line = lang.split("\n").find((entry) => entry.startsWith(`${nameKey}=`));
+    assert.ok(line, `${language}.lang defines ${nameKey}`);
+    assert.ok(line.split("=").slice(1).join("=").trim().length > 0, `${language}.lang: name is not empty`);
+  }
 }
 
 // Клик по конденсатору с манакамнем в руке должен вставить камень.
@@ -430,9 +448,9 @@ const rightAnchor = displayAnchor({ x: 5, y: 64, z: 5 }, "fusion_right");
 // X геометрии блока инвертирован к мировому X: левый слот модели x=-5 уходит на восток.
 assert.ok(Math.abs(leftAnchor.x - 5.8125) < 1e-6, `left seat x = 5.8125, got ${leftAnchor.x}`);
 assert.ok(Math.abs(rightAnchor.x - 5.1875) < 1e-6, `right seat x = 5.1875, got ${rightAnchor.x}`);
-assert.ok(Math.abs(leftAnchor.y - 64.8125) < 1e-6, `fusion seat y = 64.8125, got ${leftAnchor.y}`);
-assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "condenser").y - 64.678125) < 1e-6, "condenser seat sits on the bowl rim");
-assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "anvil").y - 65.15625) < 1e-6, "anvil seat sits on the sigil");
+assert.ok(Math.abs(leftAnchor.y - 64.5125) < 1e-6, `fusion seat y = 64.5125, got ${leftAnchor.y}`);
+assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "condenser").y - 64.378125) < 1e-6, "condenser seat is 0.3 blocks lower than before");
+assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "anvil").y - 65) < 1e-6, "anvil seat sits below the hammer");
 
 entities.length = 0;
 inventorySlots.clear();
@@ -444,14 +462,211 @@ component.onPlayerInteract({ block: anvilBlock, dimension, player });
 const displays = dimension.getEntities({ type: "minecraft:item", tags: ["mana_machine_display"] });
 assert.equal(displays.length, 1, "anvil shows exactly one display item");
 const seat = displays[0].getDynamicProperty("mana:display_anchor");
-assert.ok(Math.abs(seat.x - 2.5) < 1e-6 && Math.abs(seat.z - 2.5) < 1e-6, "anvil display is centered over the block");
-assert.ok(Math.abs(seat.y - 65.15625) < 1e-6, "anvil display sits on the sigil, not above the block");
+assert.ok(Math.abs(seat.x - 2.5) < 1e-6, "anvil display stays on the block axis");
+// Молот наковальни занимает z от -1.8 до 1.8 px, то есть +-0.1125 блока от central.
+assert.ok(seat.z - 2.5 > 0.1125, "anvil display is in front of the hammer, not inside it");
+assert.ok(Math.abs(seat.y - 65) < 1e-6, "anvil display sits below the hammer");
 assert.equal(displays[0].getDynamicProperty("mana:display_machine"), "minecraft_overworld|2|64|2", "display is bound to its machine");
-assert.equal(displays[0].getDynamicProperty("mana:display_version"), 2, "display layout version is recorded");
+assert.equal(displays[0].getDynamicProperty("mana:display_version"), 3, "display layout version is recorded");
 
 // Витринный предмет нельзя подобрать.
 const pickupEvent = { item: displays[0], cancel: false };
 beforeEvents.entityItemPickup.emit(pickupEvent);
 assert.equal(pickupEvent.cancel, true, "display item cannot be picked up");
+
+// --- Полоса маны в HUD ---
+// Канал данных для JSON UI — строка заголовка: UI читает #hud_title_text_string,
+// поэтому скрипт обязан публиковать значение ровно с тем же маркером.
+const rp = path.join(root, "src", "Mana_Machines_RP");
+const hud = JSON.parse(fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8"));
+const hudText = fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8");
+// Регрессия: собственный namespace в merge-файле ломает вставку в ванильный
+// root_panel, а $-переменные не раскрываются в поддеревьях из modifications.
+assert.equal(hud.namespace, undefined, "hud merge file must not declare its own namespace");
+assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
+
+// Регрессия, несколько раз проверенная в клиенте. Файл обязан править ровно
+// три места — вставку в root_panel и скрытие служебного заголовка:
+//   1. Модификация базового элемента (heart_renderer, progress_text_label) до
+//      инстансов @heart_renderer не доходит (v1.0.11, v1.0.12).
+//   2. Пути с @ внутри (.../heart_rend@heart_renderer) и replace по
+//      control_name приводят к ошибке ресурспака: в v1.0.13 файл был отклонён
+//      целиком, весь наш HUD пропал, а служебный заголовок стал виден.
+//   3. Вставка внутрь группы опыта ломает раскладку: там родители размера
+//      "100%c", и ребёнок со смещением по x или своей шириной сдвигает всю
+//      группу опыта и хотбар (v1.0.7).
+assert.deepEqual(Object.keys(hud).sort(), [
+  "hud_title_text/title_frame/title",
+  "hud_title_text/title_frame/title_background",
+  "root_panel"
+], "hud merge file only inserts the bar and hides the service title");
+
+function findControl(node, name) {
+  if (!node || typeof node !== "object") return null;
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const found = findControl(item, name);
+      if (found) return found;
+    }
+    return null;
+  }
+  for (const [key, value] of Object.entries(node)) {
+    if (key === name && value && typeof value === "object" && value.type) return value;
+    const found = findControl(value, name);
+    if (found) return found;
+  }
+  return null;
+}
+
+const rootMod = hud.root_panel.modifications[0];
+assert.equal(rootMod.array_name, "controls");
+assert.equal(rootMod.operation, "insert_back");
+const barPanel = rootMod.value[0].mana_bar_panel;
+assert.ok(barPanel, "mana bar panel is inserted into root_panel");
+assert.equal(barPanel.type, "panel");
+// Ширина 200 px = ширина ванильной полосы опыта. Высота 2 UI px: полосу
+// просят поставить между хотбаром и полосой опыта, а там всего ~2.6 UI px.
+assert.deepEqual(barPanel.size, [200, 2], "bar matches the xp bar width and fits the gap in height");
+assert.equal(barPanel.anchor_from, "bottom_middle");
+assert.equal(barPanel.anchor_to, "bottom_middle");
+// Замер по скриншоту Pocket (px от низа экрана): хотбар 8..117, полоса опыта
+// 130..154 (ширина 990 px = 200 UI px), цифра уровня примерно 156..182,
+// сердца и голод 163..201. Полоса встаёт в зазор между хотбаром и полосой
+// опыта: 117..130 px = 2.6 UI px. Низ на 24 UI px = 118.7 px, тогда полоса
+// занимает 118.7..128.6 px — до хотбара 1.7 px, до полосы опыта 1.4 px.
+assert.deepEqual(barPanel.offset, [0, -24], "bar sits in the gap between hotbar and xp bar");
+
+// Заливка — набор картинок, по одной на шаг: деление в JSON UI не понадобится,
+// достаточно сравнения целых чисел. Шаг 0 (мана пуста) картинки не имеет.
+const STEPS = 50;
+const fills = findControl(barPanel, "mana_bar_empty").controls;
+assert.equal(fills.length, STEPS * 2, "one fill image per step, plus a regen variant");
+const widths = new Set();
+for (const item of fills) {
+  const [name, control] = Object.entries(item)[0];
+  assert.equal(control.type, "image");
+  const visible = control.bindings.find((entry) => entry.target_property_name === "#visible");
+  const value = Number(visible.source_property_name.match(/= (\d+)\)/)[1]);
+  const regen = name.includes("regen");
+  assert.ok(value >= 1 && value <= STEPS + (regen ? 1000 : 0), `${name}: value in range`);
+  const step = regen ? value - 1000 : value;
+  assert.equal(control.texture, regen ? "textures/ui/mana_bar_fill_regen" : "textures/ui/mana_bar_fill",
+    `${name}: texture matches the regen flag`);
+  assert.deepEqual(control.size, [`${step * 2}%`, "100%"], `${name}: width matches the step`);
+  widths.add(step);
+  assert.ok(control.bindings.some((entry) => entry.binding_name === "#hud_title_text_string"),
+    `${name}: reads the title channel`);
+  assert.ok(control.bindings.some((entry) => String(entry.source_property_name).includes("'MM:'")),
+    `${name}: strips the service marker from the title string`);
+}
+assert.equal(widths.size, STEPS, "every step from 1 to 50 has its own fill image");
+// Имена контролов внутри одного родителя обязаны быть уникальны.
+const fillNames = fills.map((item) => Object.keys(item)[0]);
+assert.equal(new Set(fillNames).size, fillNames.length, "fill control names are unique");
+
+// Текстуры рисуются 1:1 с панелью, иначе рамка размывается при растяжении.
+for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
+  const data = fs.readFileSync(path.join(rp, "textures", "ui", `${name}.png`));
+  assert.equal(data.readUInt32BE(16), 200, `${name}.png is 200 px wide, same as the bar`);
+  assert.equal(data.readUInt32BE(20), 2, `${name}.png is 2 px tall, same as the bar`);
+}
+
+// Служебный заголовок игроку не показываем: без этого на экране виден "MM:50".
+const titleMod = hud["hud_title_text/title_frame/title"].modifications[0];
+assert.equal(titleMod.value.target_property_name, "#visible", "service title is hidden from the player");
+assert.ok(hud["hud_title_text/title_frame/title_background"].modifications[0].value
+  .some((entry) => entry.target_property_name === "#visible"), "service title background is hidden too");
+assert.ok(source.includes('"MM:"'), "script and UI use the same marker");
+
+// Значение публикуется шагом 0..50 (+1000 при ускоренном восстановлении).
+function publishedValue(text) {
+  assert.ok(text.startsWith("MM:"), `${text} starts with the service marker`);
+  return text.slice(3).replace(/^0/, "");
+}
+
+titles.length = 0;
+playerProps.set("mana:value", 500);
+playerProps.set("mana:regen_ticks", 0);
+context.publishManaBar(player, true);
+assert.equal(publishedValue(titles.at(-1).text), "25", "500 of 1000 mana is published as step 25 of 50");
+
+// Движок обновляет #hud_title_text_string, только когда строка меняется, иначе
+// на постоянном значении полоса застывает пустой. Ведущий ноль это лечит.
+const firstText = titles.at(-1).text;
+context.publishManaBar(player, true);
+assert.notEqual(titles.at(-1).text, firstText, "every publication changes the title string");
+assert.equal(publishedValue(titles.at(-1).text), "25", "and keeps the same value");
+
+playerProps.set("mana:regen_ticks", 120);
+context.publishManaBar(player, true);
+assert.equal(publishedValue(titles.at(-1).text), "1025", "regen adds 1000 to the published step");
+
+const publishedCount = titles.length;
+context.publishManaBar(player, false);
+assert.equal(titles.length, publishedCount, "unchanged value is not republished every tick");
+
+playerProps.set("mana:value", 1000);
+context.publishManaBar(player, false);
+assert.equal(publishedValue(titles.at(-1).text), "1050", "full mana is the last step, with regen");
+
+titles.length = 0;
+playerProps.set("mana:value", 250);
+playerProps.set("mana:regen_ticks", 0);
+context.tickPlayers();
+const published = titles.map((entry) => entry.text).filter((text) => text.startsWith("MM:"));
+assert.equal(published.length, 1, "player tick publishes the bar value once");
+assert.equal(publishedValue(published[0]), "13", "250 of 1000 mana is published as step 13");
+
+// Экспериментальная раскладка: те же цели одной операцией replace по
+// control_name. Лежит отдельным файлом, потому что в клиенте такой файл был
+// отклонён целиком (v1.0.13) — основной hud_screen.json остаётся рабочим.
+const experimental = JSON.parse(fs.readFileSync(
+  path.join(root, "experimental", "hud_screen_replace.json"), "utf8"));
+{
+  const [bar, level] = experimental.root_panel.modifications[0].value;
+  assert.deepEqual(bar.mana_bar_panel.offset, [0, -32], "experiment: bar flush above the xp bar");
+  assert.deepEqual(level.mana_level_text.offset, [-107, -26], "experiment: level number moved aside");
+  for (const [container, hungerX] of [
+    ["centered_gui_elements_at_bottom_middle", 180],
+    ["centered_gui_elements_at_bottom_middle_touch", 200]
+  ]) {
+    const replaced = Object.fromEntries(experimental[container].modifications
+      .map((entry) => [entry.control_name, entry.value[0][entry.control_name].offset]));
+    assert.deepEqual(replaced["heart_rend@heart_renderer"], [-1, -47], `${container}: hearts lifted`);
+    assert.deepEqual(replaced["hunger_rend@hunger_renderer"], [hungerX, -47], `${container}: hunger lifted`);
+  }
+  // Оригинал цифры уровня уводится только по y: родитель размера "100%c".
+  for (const parent of ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+    "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]) {
+    const entry = experimental[parent].modifications[0];
+    assert.deepEqual(entry.value[0][entry.control_name].offset, [0, -500],
+      `${parent}: level label moved away vertically only`);
+  }
+}
+
+// Экшен-бар: ману теперь показывает полоса в HUD, поэтому в строке остаются
+// только сообщения об ошибках, а после них строка очищается один раз.
+playerProps.set("mana:value", 700);
+playerProps.set("mana:regen_ticks", 0);
+playerProps.set("mana:error_ticks", 0);
+context.tickPlayers();          // первый тик гасит строку от прежних ошибок
+actionBars.length = 0;
+context.tickPlayers();
+assert.equal(actionBars.length, 0, "no mana readout in the action bar any more");
+
+context.showError(player, "Не хватает маны");
+context.tickPlayers();
+assert.ok(actionBars.at(-1).includes("Не хватает маны"), "error message is still shown");
+assert.ok(!actionBars.at(-1).includes("1000"), "action bar shows no mana numbers");
+
+// Сообщение гаснет — строку очищаем ровно один раз, а не каждый тик.
+playerProps.set("mana:error_ticks", 1);
+context.tickPlayers();
+assert.ok(actionBars.at(-1).includes("Не хватает маны"), "last tick of the error still shows it");
+context.tickPlayers();
+assert.equal(actionBars.at(-1), "", "action bar is cleared once after the error");
+const cleared = actionBars.length;
+context.tickPlayers();
+assert.equal(actionBars.length, cleared, "and is not cleared again on later ticks");
 
 console.log("runtime-smoke: OK");

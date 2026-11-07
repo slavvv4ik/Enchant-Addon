@@ -1,0 +1,3208 @@
+{
+ "root_panel": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "operation": "insert_back",
+    "value": [
+     {
+      "mana_bar_panel": {
+       "type": "panel",
+       "size": [
+        200,
+        5
+       ],
+       "anchor_from": "bottom_middle",
+       "anchor_to": "bottom_middle",
+       "offset": [
+        0,
+        -32
+       ],
+       "layer": 8,
+       "controls": [
+        {
+         "mana_bar_empty": {
+          "type": "image",
+          "texture": "textures/ui/mana_bar_empty",
+          "size": [
+           "100%",
+           "100%"
+          ],
+          "layer": 1,
+          "controls": [
+           {
+            "mana_bar_fill_2": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "2%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_2": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "2%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1001)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_4": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "4%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 2)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_4": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "4%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1002)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_6": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "6%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 3)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_6": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "6%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1003)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_8": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "8%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 4)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_8": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "8%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1004)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_10": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "10%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 5)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_10": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "10%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1005)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_12": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "12%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 6)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_12": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "12%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1006)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_14": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "14%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 7)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_14": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "14%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1007)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_16": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "16%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 8)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_16": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "16%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1008)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_18": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "18%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 9)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_18": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "18%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1009)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_20": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "20%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 10)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_20": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "20%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1010)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_22": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "22%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 11)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_22": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "22%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1011)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_24": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "24%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 12)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_24": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "24%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1012)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_26": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "26%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 13)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_26": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "26%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1013)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_28": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "28%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 14)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_28": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "28%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1014)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_30": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "30%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 15)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_30": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "30%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1015)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_32": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "32%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 16)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_32": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "32%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1016)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_34": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "34%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 17)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_34": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "34%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1017)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_36": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "36%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 18)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_36": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "36%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1018)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_38": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "38%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 19)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_38": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "38%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1019)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_40": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "40%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 20)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_40": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "40%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1020)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_42": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "42%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 21)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_42": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "42%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1021)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_44": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "44%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 22)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_44": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "44%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1022)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_46": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "46%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 23)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_46": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "46%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1023)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_48": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "48%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 24)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_48": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "48%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1024)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_50": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "50%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 25)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_50": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "50%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1025)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_52": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "52%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 26)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_52": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "52%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1026)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_54": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "54%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 27)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_54": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "54%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1027)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_56": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "56%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 28)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_56": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "56%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1028)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_58": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "58%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 29)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_58": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "58%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1029)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_60": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "60%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 30)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_60": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "60%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1030)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_62": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "62%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 31)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_62": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "62%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1031)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_64": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "64%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 32)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_64": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "64%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1032)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_66": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "66%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 33)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_66": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "66%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1033)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_68": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "68%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 34)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_68": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "68%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1034)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_70": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "70%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 35)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_70": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "70%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1035)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_72": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "72%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 36)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_72": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "72%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1036)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_74": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "74%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 37)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_74": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "74%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1037)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_76": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "76%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 38)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_76": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "76%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1038)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_78": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "78%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 39)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_78": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "78%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1039)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_80": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "80%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 40)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_80": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "80%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1040)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_82": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "82%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 41)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_82": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "82%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1041)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_84": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "84%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 42)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_84": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "84%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1042)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_86": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "86%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 43)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_86": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "86%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1043)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_88": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "88%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 44)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_88": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "88%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1044)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_90": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "90%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 45)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_90": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "90%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1045)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_92": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "92%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 46)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_92": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "92%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1046)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_94": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "94%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 47)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_94": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "94%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1047)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_96": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "96%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 48)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_96": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "96%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1048)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_98": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "98%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 49)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_98": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "98%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1049)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_100": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill",
+             "size": [
+              "100%",
+              "100%"
+             ],
+             "layer": 2,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 50)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           },
+           {
+            "mana_bar_fill_regen_100": {
+             "type": "image",
+             "texture": "textures/ui/mana_bar_fill_regen",
+             "size": [
+              "100%",
+              "100%"
+             ],
+             "layer": 3,
+             "bindings": [
+              {
+               "binding_name": "#hud_title_text_string",
+               "binding_name_override": "#mana_raw",
+               "binding_type": "global"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "((#mana_raw - 'MM:') + 0)",
+               "target_property_name": "#mana_value"
+              },
+              {
+               "binding_type": "view",
+               "source_property_name": "(#mana_value = 1050)",
+               "target_property_name": "#visible"
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       ]
+      }
+     },
+     {
+      "mana_level_text": {
+       "type": "label",
+       "shadow": true,
+       "text": "#level_number",
+       "color": "$experience_text_color",
+       "anchor_from": "bottom_middle",
+       "anchor_to": "bottom_middle",
+       "offset": [
+        -107,
+        -26
+       ],
+       "layer": 8,
+       "bindings": [
+        {
+         "binding_name": "#level_number",
+         "binding_type": "global"
+        },
+        {
+         "binding_name": "#level_number_visible",
+         "binding_type": "global",
+         "binding_name_override": "#visible"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "heart_rend@heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "heart_rend@heart_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "armor_rend@armor_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "armor_rend@armor_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "hunger_rend@hunger_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "hunger_rend@hunger_renderer": {
+       "offset": [
+        180,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_0@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_0@bubbles_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_1@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_1@bubbles_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_0@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_0@horse_heart_renderer": {
+       "offset": [
+        180,
+        -63
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_1@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_1@horse_heart_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "heart_rend@heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "heart_rend@heart_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "armor_rend@armor_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "armor_rend@armor_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "hunger_rend@hunger_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "hunger_rend@hunger_renderer": {
+       "offset": [
+        200,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_0@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_0@bubbles_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_1@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_1@bubbles_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_0@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_0@horse_heart_renderer": {
+       "offset": [
+        200,
+        -63
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_1@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_1@horse_heart_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "hud_title_text/title_frame/title": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": {
+     "binding_type": "view",
+     "source_property_name": "((#text - 'MM:') = #text)",
+     "target_property_name": "#visible"
+    }
+   }
+  ]
+ },
+ "hud_title_text/title_frame/title_background": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_title_text",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_title_text - 'MM:') = #mana_title_text)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ }
+}

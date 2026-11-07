@@ -2846,7 +2846,7 @@
        "anchor_to": "bottom_middle",
        "offset": [
         -107,
-        26
+        -26
        ],
        "layer": 8,
        "bindings": [
@@ -2866,7 +2866,7 @@
    }
   ]
  },
- "heart_renderer": {
+ "centered_gui_elements_at_bottom_middle/heart_rend@heart_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -2891,7 +2891,7 @@
    }
   ]
  },
- "hunger_renderer": {
+ "centered_gui_elements_at_bottom_middle/armor_rend@armor_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -2916,7 +2916,7 @@
    }
   ]
  },
- "armor_renderer": {
+ "centered_gui_elements_at_bottom_middle/hunger_rend@hunger_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -2941,7 +2941,7 @@
    }
   ]
  },
- "bubbles_renderer": {
+ "centered_gui_elements_at_bottom_middle/bubbles_rend_0@bubbles_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -2966,7 +2966,7 @@
    }
   ]
  },
- "horse_heart_renderer": {
+ "centered_gui_elements_at_bottom_middle/bubbles_rend_1@bubbles_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -2991,7 +2991,32 @@
    }
   ]
  },
- "progress_text_label": {
+ "centered_gui_elements_at_bottom_middle/horse_heart_rend_0@horse_heart_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle/horse_heart_rend_1@horse_heart_renderer": {
   "modifications": [
    {
     "array_name": "bindings",
@@ -3184,6 +3209,300 @@
       }
      }
     ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "heart_rend@heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "heart_rend@heart_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "armor_rend@armor_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "armor_rend@armor_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "hunger_rend@hunger_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "hunger_rend@hunger_renderer": {
+       "offset": [
+        180,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_0@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_0@bubbles_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_1@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_1@bubbles_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_0@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_0@horse_heart_renderer": {
+       "offset": [
+        180,
+        -63
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_1@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_1@horse_heart_renderer": {
+       "offset": [
+        180,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/heart_rend@heart_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/armor_rend@armor_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/hunger_rend@hunger_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/bubbles_rend_0@bubbles_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/bubbles_rend_1@bubbles_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/horse_heart_rend_0@horse_heart_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "centered_gui_elements_at_bottom_middle_touch/horse_heart_rend_1@horse_heart_renderer": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -3355,6 +3674,125 @@
       }
      }
     ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "heart_rend@heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "heart_rend@heart_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "armor_rend@armor_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "armor_rend@armor_renderer": {
+       "offset": [
+        -1,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "hunger_rend@hunger_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "hunger_rend@hunger_renderer": {
+       "offset": [
+        200,
+        -47
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_0@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_0@bubbles_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "bubbles_rend_1@bubbles_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "bubbles_rend_1@bubbles_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_0@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_0@horse_heart_renderer": {
+       "offset": [
+        200,
+        -63
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
+   },
+   {
+    "array_name": "controls",
+    "control_name": "horse_heart_rend_1@horse_heart_renderer",
+    "operation": "replace",
+    "value": [
+     {
+      "horse_heart_rend_1@horse_heart_renderer": {
+       "offset": [
+        200,
+        -57
+       ],
+       "anchor_from": "bottom_left",
+       "anchor_to": "bottom_left"
+      }
+     }
+    ]
    }
   ]
  },
@@ -3501,6 +3939,141 @@
         }
        ]
       }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar/progress_text_label@progress_text_label": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar/progress_text_label@progress_text_label": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar": {
+  "modifications": [
+   {
+    "array_name": "controls",
+    "control_name": "progress_text_label@progress_text_label",
+    "operation": "replace",
+    "value": [
+     {
+      "progress_text_label@progress_text_label": {
+       "offset": [
+        0,
+        -500
+       ],
+       "layer": 7
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar/progress_text_label@progress_text_label": {
+  "modifications": [
+   {
+    "array_name": "bindings",
+    "operation": "insert_back",
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
      }
     ]
    }

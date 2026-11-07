@@ -471,11 +471,25 @@ assert.equal(hud.namespace, undefined, "hud merge file must not declare its own 
 assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
 
 // Регрессия: внутри цепочки ванильной полосы опыта родители размера "100%c"
-// (по содержимому), и любой ребёнок со смещением или своей шириной меняет
-// границы содержимого — вся группа опыта и хотбар уезжают. Поэтому группы
-// опыта не трогаем совсем, а свою цифру уровня кладём в root_panel.
-for (const banned of Object.keys(hud).filter((key) => key.startsWith("exp_"))) {
-  assert.fail(`${banned} must not be modified`);
+// (по содержимому), и любой ребёнок со смещением по x или своей шириной меняет
+// границы содержимого — вся группа опыта и хотбар уезжают (уже было в v1.0.7).
+// Поэтому в группы опыта можно только убрать оригинал цифры уровня, и только
+// по вертикали: от y границы содержимого не зависят.
+for (const [path, block] of Object.entries(hud).filter(([key]) => key.startsWith("exp_"))) {
+  for (const entry of block.modifications) {
+    if (entry.array_name === "bindings") {
+      assert.equal(entry.operation, "insert_back", `${path}: only a hiding binding is added`);
+      continue;
+    }
+    assert.equal(entry.operation, "replace", `${path}: only the level label is replaced`);
+    for (const item of entry.value) {
+      for (const [name, control] of Object.entries(item)) {
+        assert.equal(name, "progress_text_label@progress_text_label", `${path}: level label only`);
+        assert.deepEqual(control.offset, [0, -500], `${path}: moved away vertically, x untouched`);
+        assert.equal(control.size, undefined, `${path}: no own size inside a content-sized parent`);
+      }
+    }
+  }
 }
 
 function findControl(node, name) {
@@ -548,22 +562,33 @@ for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
 // вместо них вставлены свои копии на 7 UI px выше (было -40).
 // Почему так: править экземпляр через replace с якорем where.control_name
 // движок отказался — в клиенте v1.0.10 сердца и голод остались на месте.
-// Оригиналы скрываются тем же приёмом, что и заливка полосы: читаем строку
-// заголовка и сравниваем со значением, которого скрипт не публикует. Вид
-// {"binding_name": "(0)", "binding_name_override": "#visible"} в клиенте
-// не сработал — оригиналы сердец и голода остались видны поверх полосы.
-for (const base of ["heart_renderer", "hunger_renderer", "armor_renderer", "bubbles_renderer",
-  "horse_heart_renderer", "progress_text_label"]) {
-  const mod = hud[base].modifications[0];
-  assert.equal(mod.array_name, "bindings", `${base}: hidden through a binding`);
-  assert.equal(mod.operation, "insert_back");
-  const bindings = mod.value;
-  assert.equal(bindings.length, 3, `${base}: same channel as the bar fills`);
-  assert.equal(bindings[0].binding_name, "#hud_title_text_string", `${base}: reads the title channel`);
-  const visible = bindings[2];
-  assert.equal(visible.target_property_name, "#visible", `${base}: visibility is overridden`);
-  const never = Number(visible.source_property_name.match(/= (\d+)\)/)[1]);
-  assert.ok(never > 1050, `${base}: hides on a value the script never publishes`);
+// Оригиналы сердец и голода скрываются двумя способами сразу: правим сам
+// инстанс через replace и дублируем скрытие биндингом по пути инстанса.
+// Модификация базового элемента (heart_renderer) до инстансов @heart_renderer
+// не доходит — проверено в клиенте в v1.0.11 и v1.0.12.
+for (const container of ["centered_gui_elements_at_bottom_middle",
+  "centered_gui_elements_at_bottom_middle_touch"]) {
+  for (const instance of ["heart_rend@heart_renderer", "hunger_rend@hunger_renderer"]) {
+    const path = `${container}/${instance}`;
+    const mod = hud[path].modifications[0];
+    assert.equal(mod.array_name, "bindings", `${path}: hidden through a binding`);
+    assert.equal(mod.operation, "insert_back");
+    const bindings = mod.value;
+    assert.equal(bindings.length, 3, `${path}: same channel as the bar fills`);
+    assert.equal(bindings[0].binding_name, "#hud_title_text_string", `${path}: reads the title channel`);
+    const visible = bindings[2];
+    assert.equal(visible.target_property_name, "#visible", `${path}: visibility is overridden`);
+    const never = Number(visible.source_property_name.match(/= (\d+)\)/)[1]);
+    assert.ok(never > 1050, `${path}: hides on a value the script never publishes`);
+  }
+}
+for (const path of [
+  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar/progress_text_label@progress_text_label",
+  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar/progress_text_label@progress_text_label"
+]) {
+  const bindings = hud[path].modifications[0].value;
+  assert.ok(bindings.some((entry) => entry.target_property_name === "#visible"),
+    `${path}: vanilla level label is hidden`);
 }
 for (const [container, hungerX] of [
   ["centered_gui_elements_at_bottom_middle", 180],
@@ -583,6 +608,15 @@ for (const [container, hungerX] of [
     `${container}: horse hearts lifted`);
   assert.equal(widgets.mana_heart_rend.renderer, "heart_renderer", `${container}: custom renderer kept`);
   assert.equal(widgets.mana_hunger_rend.renderer, "hunger_renderer", `${container}: custom renderer kept`);
+  // Оригиналы правим на месте: replace по control_name, без where.
+  const replaced = Object.fromEntries(hud[container].modifications
+    .filter((entry) => entry.operation === "replace")
+    .map((entry) => [entry.control_name, entry.value[0][entry.control_name].offset]));
+  assert.deepEqual(replaced["heart_rend@heart_renderer"], [-1, -47], `${container}: hearts replaced`);
+  assert.deepEqual(replaced["hunger_rend@hunger_renderer"], [hungerX, -47], `${container}: hunger replaced`);
+  assert.deepEqual(replaced["armor_rend@armor_renderer"], [-1, -47], `${container}: armor replaced`);
+  assert.deepEqual(replaced["bubbles_rend_0@bubbles_renderer"], [hungerX, -57],
+    `${container}: bubbles replaced`);
 }
 // Классическая раскладка (сердца слева сверху, голод справа): она базовые
 // элементы тоже использует, поэтому копии вставляем на прежних местах.
@@ -595,14 +629,16 @@ assert.deepEqual(classic.mana_hunger_rend.offset, [-2, 2], "classic layout keeps
 // Цифра уровня опыта: ванильная подпись стояла по центру над полосой опыта и
 // попадала ровно под полосу маны. Свою копию кладём в root_panel — вне групп
 // опыта — и привязываем к низу экрана: полоса опыта занимает 26.3..31.1 UI px,
-// значит низ подписи на 26 UI px даёт центр ровно на уровне полосы.
+// значит низ подписи на -26 UI px (минус = вверх, как у полосы маны) даёт
+// центр ровно на уровне полосы.
 const levelLabel = hud.root_panel.modifications[0].value[1].mana_level_text;
 assert.equal(levelLabel.type, "label");
 assert.equal(levelLabel.text, "#level_number", "own copy shows the vanilla level number");
 assert.equal(levelLabel.color, "$experience_text_color", "own copy keeps the vanilla colour");
 assert.equal(levelLabel.anchor_from, "bottom_middle", "own copy is anchored to the screen bottom");
 assert.equal(levelLabel.anchor_to, "bottom_middle");
-assert.deepEqual(levelLabel.offset, [-107, 26], "level number sits left of the xp bar, level with it");
+assert.deepEqual(levelLabel.offset, [-107, -26], "level number sits left of the xp bar, level with it");
+assert.ok(levelLabel.offset[1] < 0, "negative y moves the label up, like the bar offset");
 assert.ok(levelLabel.bindings.some((entry) => entry.binding_name === "#level_number_visible"),
   "own copy is visible exactly when vanilla shows the level");
 

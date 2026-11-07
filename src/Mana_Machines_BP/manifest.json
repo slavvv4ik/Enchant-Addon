@@ -1,0 +1,54 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Mana Machines BP",
+    "description": "Mana, mana stones and multiplayer machines",
+    "uuid": "b3fd1d60-79dd-4a3c-9a6a-9d7c49b6c0a1",
+    "version": [
+      1,
+      0,
+      5
+    ],
+    "min_engine_version": [
+      1,
+      26,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "b3fd1d60-79dd-4a3c-9a6a-9d7c49b6c0a2",
+      "version": [
+        1,
+        0,
+        5
+      ]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "entry": "scripts/main.js",
+      "uuid": "b3fd1d60-79dd-4a3c-9a6a-9d7c49b6c0a3",
+      "version": [
+        1,
+        0,
+        5
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "9e9f0b3c-ef3e-4a2b-ae48-2a4f76d6b2d1",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.11.0"
+    }
+  ]
+}

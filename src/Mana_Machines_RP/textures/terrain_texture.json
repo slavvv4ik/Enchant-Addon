@@ -1,0 +1,9 @@
+{
+  "resource_pack_name": "Mana Machines RP",
+  "texture_name": "atlas.terrain",
+  "texture_data": {
+    "mana_condenser": {"textures": "textures/blocks/mana_condenser"},
+    "mana_anvil": {"textures": "textures/blocks/mana_anvil"},
+    "msmerge_block": {"textures": "textures/blocks/msmerge_block"}
+  }
+}

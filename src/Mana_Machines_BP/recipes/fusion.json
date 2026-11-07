@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "mana:recipe_fusion" },
+    "tags": [ "crafting_table" ],
+    "pattern": [ "OGO", "DED", "OGO" ],
+    "key": {
+      "O": { "item": "minecraft:obsidian" },
+      "G": { "item": "minecraft:gold_block" },
+      "D": { "item": "minecraft:diamond_block" },
+      "E": { "item": "minecraft:ender_eye" }
+    },
+    "unlock": [
+      { "item": "minecraft:obsidian" }
+    ],
+    "result": { "item": "mana:fusion", "count": 1 }
+  }
+}

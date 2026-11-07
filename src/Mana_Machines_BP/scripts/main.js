@@ -10,10 +10,30 @@ const ERROR_TICKS_KEY = "mana:error_ticks";
 const MACHINES_KEY = "mana:machines";
 const DISPLAY_TAG = "mana_machine_display";
 const ANCHOR_KEY = "mana:display_anchor";
+const DISPLAY_MACHINE_KEY = "mana:display_machine";
+const DISPLAY_SLOT_KEY = "mana:display_slot";
+const DISPLAY_VERSION_KEY = "mana:display_version";
+const DISPLAY_LAYOUT_VERSION = 2;
 const MACHINE_IDS = new Set(["mana:condenser", "mana:anvil", "mana:fusion"]);
 const MACHINE_COMPONENT_ID = "mana:machine_interaction";
 const FULL_STONE = "mana:full_manastone";
 const BASE_STONE = "mana:manastone";
+const STONE_LEVEL_KEY = "mana:level";
+const ROMAN_LEVELS = ["", "I", "II", "III", "IV", "V"];
+const DROP_RECIPE = ["minecraft:lapis_lazuli", "minecraft:gold_nugget", "minecraft:stone"];
+const DROP_RECIPE_IDS = new Set(DROP_RECIPE);
+const DROP_SCAN_RADIUS = 10;
+const DROP_CLUSTER_RADIUS = 2;
+const DROP_CLUSTER_VERTICAL_RADIUS = 1;
+const DROP_SCAN_INTERVAL = 10;
+// Координаты моделей в пикселях (16 px = 1 блок). X модели инвертирован к мировому X.
+// У слияния используем pivot item_slot_left/right; у остальных — центр чаши/сигила.
+const DISPLAY_SEATS = {
+  condenser: { x: 0, y: 8.85, z: 0 },
+  anvil: { x: 0, y: 16.5, z: 0 },
+  fusion_left: { x: -5, y: 11, z: 0 },
+  fusion_right: { x: 5, y: 11, z: 0 }
+};
 
 const stones = {
   "mana:stone_aqua_affinity": { enchant: "aqua_affinity", max: 1, modifier: ["minecraft:turtle_helmet"], name: "Подводник" },
@@ -53,7 +73,7 @@ let machines = {};
 let machinesLoaded = false;
 let lootSeen = new Set();
 let lootSeenLoaded = false;
-const dropLocks = new Set();
+const pendingDropChecks = new Set();
 const interactionCooldowns = new Map();
 
 function loadMachines() {
@@ -157,16 +177,39 @@ function giveItem(player, stack) {
   if (remainder) player.dimension.spawnItem(remainder, player.location);
 }
 
+function stoneMaxLevel(id) {
+  const info = stones[id];
+  if (!info) return 1;
+  const type = enchantmentType(info.enchant);
+  const apiMax = type?.maxLevel;
+  // Не превышаем ни ванильный предел таблицы, ни предел установленного реестра игры.
+  return Number.isInteger(apiMax) && apiMax > 0 ? Math.min(info.max, apiMax) : info.max;
+}
+
+function normalizeStoneLevel(id, value) {
+  const level = Number(value);
+  return Number.isFinite(level) && level >= 1
+    ? Math.max(1, Math.min(stoneMaxLevel(id), Math.floor(level)))
+    : 1;
+}
+
 function makeStone(id, level = 1) {
-  const stack = new ItemStack(id, 1);
-  try { stack.setDynamicProperty("mana:level", level); } catch {}
   const data = stones[id];
+  if (!data) throw new Error(`Unknown mana stone: ${id}`);
+  level = normalizeStoneLevel(id, level);
+  const stack = new ItemStack(id, 1);
+  // Все stone_*.json обязаны иметь max_stack_size: 1. На стаковом предмете API
+  // бросает исключение; раньше пустой catch превращал любой такой камень в уровень I.
+  // Ошибку сохранения больше не скрываем. Её ловит строгий регрессионный тест.
+  stack.setDynamicProperty(STONE_LEVEL_KEY, level);
   stack.nameTag = `§bМанакамень (${data.name}) ${roman(level)}`;
+  try { stack.setLore([`§7Уровень: ${roman(level)} / ${roman(stoneMaxLevel(id))}`]); }
+  catch (error) { console.warn(`[Mana Machines] Не удалось добавить описание манакамня: ${error}`); }
   return stack;
 }
 
 function roman(value) {
-  return ["", "I", "II", "III", "IV", "V"][Math.max(0, Math.min(5, value))] || String(value);
+  return ROMAN_LEVELS[Math.max(0, Math.min(5, Math.floor(value)))] || String(value);
 }
 
 // ID зачарований в Bedrock могут прийти как с префиксом "minecraft:", так и без него.
@@ -189,9 +232,20 @@ function enchantmentType(id) {
 }
 
 function stackLevel(stack) {
-  if (!stack) return 1;
-  const level = Number(stack.getDynamicProperty("mana:level"));
-  return Number.isFinite(level) && level > 0 ? level : 1;
+  if (!stack || !stoneIds.has(stack.typeId)) return 1;
+  let stored;
+  try { stored = stack.getDynamicProperty(STONE_LEVEL_KEY); } catch {}
+  const level = Number(stored);
+  if (Number.isFinite(level) && level >= 1) return normalizeStoneLevel(stack.typeId, level);
+  // Совместимость с камнями v1.0.4: уровень есть в названии, но не сохранился в DP.
+  // Если разные названия оказались в одном старом стаке, данные одного предмета
+  // восстановить нельзя — не создаём несколько камней из одного предмета.
+  const prefix = `§bМанакамень (${stones[stack.typeId].name}) `;
+  if (typeof stack.nameTag === "string" && stack.nameTag.startsWith(prefix)) {
+    const index = ROMAN_LEVELS.indexOf(stack.nameTag.slice(prefix.length));
+    if (index > 0) return normalizeStoneLevel(stack.typeId, index);
+  }
+  return 1;
 }
 
 function getMana(player) {
@@ -219,51 +273,86 @@ function isEmptyHand(player) {
   return !stack || stack.amount < 1;
 }
 
-function displayItemId(slot) {
-  if (!slot) return null;
-  return slot.id;
+function displayAnchor(location, seatName) {
+  const seat = DISPLAY_SEATS[seatName];
+  if (!seat) return undefined;
+  // Это якорь рендера, а не опора физической коллизии. Компенсируем подъём
+  // спрайта примерно на 2 px; ванильное покачивание/вращение остаётся клиентским.
+  return {
+    x: location.x + 0.5 - seat.x / 16,
+    y: location.y + seat.y / 16 + 0.125,
+    z: location.z + 0.5 + seat.z / 16
+  };
 }
 
 function clearDisplayEntities(dimension, location) {
-  const entities = dimension.getEntities({ type: "minecraft:item", tags: [DISPLAY_TAG] });
+  const key = machineKey(dimension, location);
+  let entities;
+  try {
+    // Старые витрины без machine key тоже найдём, чтобы обновление не оставило дубликаты.
+    entities = dimension.getEntities({
+      type: "minecraft:item", tags: [DISPLAY_TAG],
+      location: { x: location.x + 0.5, y: location.y + 0.75, z: location.z + 0.5 }, maxDistance: 2.5
+    });
+  } catch { return; }
   for (const entity of entities) {
-    const p = entity.location;
-    if (Math.abs(p.x - (location.x + 0.5)) < 1.2 && Math.abs(p.y - (location.y + 1.3)) < 1.4 && Math.abs(p.z - (location.z + 0.5)) < 1.2) {
-      try { entity.kill(); } catch {}
-    }
+    try {
+      const owner = entity.getDynamicProperty(DISPLAY_MACHINE_KEY);
+      const anchor = entity.getDynamicProperty(ANCHOR_KEY);
+      const legacyNearby = owner === undefined && anchor && typeof anchor === "object" &&
+        Math.abs(anchor.x - (location.x + 0.5)) <= 0.8 &&
+        Math.abs(anchor.y - (location.y + 1.25)) <= 0.1 &&
+        Math.abs(anchor.z - (location.z + 0.5)) <= 0.8;
+      if (owner === key || legacyNearby) entity.remove();
+    } catch {}
   }
 }
 
-function spawnDisplay(dimension, location, slot, offsetX = 0, offsetZ = 0) {
-  if (!slot?.id) return;
+function spawnDisplay(dimension, location, slot, seatName) {
+  if (!slot?.id) return false;
+  const anchor = displayAnchor(location, seatName);
+  if (!anchor) return false;
+  let entity;
   try {
-    const stack = slot.id.startsWith("mana:stone_") ? makeStone(slot.id, slot.level || 1) : new ItemStack(slot.id, 1);
-    const anchor = { x: location.x + 0.5 + offsetX, y: location.y + 1.25, z: location.z + 0.5 + offsetZ };
-    const entity = dimension.spawnItem(stack, anchor);
+    const stack = deserializeStack(slot);
+    if (!stack) return false;
+    entity = dimension.spawnItem(stack, anchor);
     entity.addTag(DISPLAY_TAG);
-    // Компонентов minecraft:pickup_delay / minecraft:physics в Script API нет.
-    // Якорь храним в dynamic property, подбор запрещаем через beforeEvents.entityItemPickup,
-    // а от гравитации защищаем периодическим teleport обратно к якорю (stabilizeDisplays).
-    try { entity.setDynamicProperty(ANCHOR_KEY, anchor); } catch {}
-  } catch {}
+    // pickup_delay / physics у item-энтити через этот API не настраиваются.
+    // Подбор отменяется в beforeEvents, положение удерживается stabilizeDisplays.
+    entity.setDynamicProperty(ANCHOR_KEY, anchor);
+    entity.setDynamicProperty(DISPLAY_MACHINE_KEY, machineKey(dimension, location));
+    entity.setDynamicProperty(DISPLAY_SLOT_KEY, seatName);
+    entity.setDynamicProperty(DISPLAY_VERSION_KEY, DISPLAY_LAYOUT_VERSION);
+    return true;
+  } catch (error) {
+    // Ошибка витрины не должна стирать предмет из состояния машины или создавать дубликат.
+    try { entity?.remove(); } catch {}
+    console.warn(`[Mana Machines] Ошибка витрины ${slot.id}: ${error}`);
+    return false;
+  }
 }
 
 function refreshMachineDisplay(dimension, location, data) {
   clearDisplayEntities(dimension, location);
-  if (data.kind === "condenser" && data.slot === "manastone") spawnDisplay(dimension, location, { id: BASE_STONE });
-  if (data.kind === "condenser" && data.slot === "full") spawnDisplay(dimension, location, { id: FULL_STONE });
-  if (data.kind === "anvil" && data.slot) spawnDisplay(dimension, location, data.slot);
+  if (data.kind === "condenser" && data.slot === "manastone") spawnDisplay(dimension, location, { id: BASE_STONE }, "condenser");
+  if (data.kind === "condenser" && data.slot === "full") spawnDisplay(dimension, location, { id: FULL_STONE }, "condenser");
+  if (data.kind === "anvil" && data.slot) spawnDisplay(dimension, location, data.slot, "anvil");
   if (data.kind === "fusion") {
-    if (data.left) spawnDisplay(dimension, location, data.left, -0.22, 0);
-    if (data.right) spawnDisplay(dimension, location, data.right, 0.22, 0);
+    if (data.left) spawnDisplay(dimension, location, data.left, "fusion_left");
+    if (data.right) spawnDisplay(dimension, location, data.right, "fusion_right");
   }
 }
 
 function serializeStack(stack) {
   if (!stack) return null;
   const result = { id: stack.typeId, amount: 1 };
-  if (stoneIds.has(stack.typeId)) result.level = stackLevel(stack);
-  try { result.nameTag = stack.nameTag || undefined; } catch {}
+  if (stoneIds.has(stack.typeId)) {
+    result.level = stackLevel(stack);
+    result.nameTag = `§bМанакамень (${stones[stack.typeId].name}) ${roman(result.level)}`;
+  } else {
+    try { result.nameTag = stack.nameTag || undefined; } catch {}
+  }
   try {
     const enchantable = stack.getComponent("minecraft:enchantable");
     if (enchantable) {
@@ -347,11 +436,11 @@ function applyStoneToItem(item, stoneId, stoneLevel) {
   const current = readEnchantments(output).find((entry) => entry.id === stone.enchant);
   let level = stoneLevel;
   if (current) {
-    if (current.level === stoneLevel && stoneLevel < stone.max) level = stoneLevel + 1;
+    if (current.level === stoneLevel && stoneLevel < stoneMaxLevel(stoneId)) level = stoneLevel + 1;
     else level = Math.max(current.level, stoneLevel);
     try { enchantable.removeEnchantment(enchantmentType(stone.enchant) ?? stone.enchant); } catch { return null; }
   }
-  if (level > stone.max) return null;
+  if (level > stoneMaxLevel(stoneId)) return null;
   try {
     const type = enchantmentType(stone.enchant);
     if (!type) return null;
@@ -371,10 +460,11 @@ function completeFusion(player, dimension, location, data) {
       fusionError(player, "Для повышения уровня нужны два одинаковых манакамня");
       return false;
     }
-    const info = stones[data.left.id];
-    const next = (data.left.level || 1) + 1;
-    if (next > info.max) {
-      fusionError(player, "У этого зачарования уже максимальный уровень");
+    const max = stoneMaxLevel(data.left.id);
+    const leftLevel = normalizeStoneLevel(data.left.id, data.left.level);
+    const next = leftLevel + 1;
+    if (leftLevel >= max || next > max) {
+      fusionError(player, `Максимальный уровень этого зачарования: ${roman(max)}`);
       return false;
     }
     result = makeStone(data.left.id, next);
@@ -382,7 +472,8 @@ function completeFusion(player, dimension, location, data) {
     const stoneSlot = leftStone ? data.left : data.right;
     const itemSlot = leftStone ? data.right : data.left;
     const item = deserializeStack(itemSlot);
-    result = applyStoneToItem(item, stoneSlot.id, stoneSlot.level || 1);
+    if (!item) return false;
+    result = applyStoneToItem(item, stoneSlot.id, normalizeStoneLevel(stoneSlot.id, stoneSlot.level));
     if (!result) {
       fusionError(player, "Это зачарование нельзя применить к данному предмету");
       return false;
@@ -482,6 +573,15 @@ function interactWithMachine(player, dimension, location, typeId) {
   if (last !== undefined && now - last < 5) return;
   interactionCooldowns.set(cooldownKey, now);
   const { data } = getMachine(dimension, location, typeId);
+  if (data.kind === "fusion") {
+    let migrated = false;
+    for (const slot of [data.left, data.right]) {
+      if (!slot || !stoneIds.has(slot.id)) continue;
+      const level = stackLevel(deserializeStack(slot));
+      if (slot.level !== level) { slot.level = level; migrated = true; }
+    }
+    if (migrated) setMachine(key, data);
+  }
   if (typeId === "mana:condenser") checkCondenser(player, dimension, location, data);
   else if (typeId === "mana:anvil") checkAnvil(player, dimension, location, data);
   else checkFusion(player, dimension, location, data);
@@ -567,44 +667,125 @@ function itemEntityStack(entity) {
   try { return entity.getComponent("minecraft:item")?.itemStack; } catch { return null; }
 }
 
-function consumeEntityItem(entity, count) {
-  const stack = itemEntityStack(entity);
-  if (!stack || stack.amount < count) return;
-  const remaining = stack.amount - count;
-  const location = entity.location;
-  const dimension = entity.dimension;
-  try { entity.kill(); } catch {}
-  if (remaining > 0) {
-    const rest = new ItemStack(stack.typeId, remaining);
-    dimension.spawnItem(rest, location);
+function distanceSquared(a, b) {
+  return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2;
+}
+
+function droppedRecipeCandidates(dimension, center) {
+  let entities;
+  try {
+    entities = dimension.getEntities({
+      type: "minecraft:item", excludeTags: [DISPLAY_TAG], location: center, maxDistance: DROP_CLUSTER_RADIUS
+    });
+  } catch { return []; }
+  const candidates = [];
+  for (const entity of entities) {
+    try {
+      if (!entity.isValid || entity.hasTag(DISPLAY_TAG)) continue;
+      const p = entity.location;
+      if (Math.abs(p.y - center.y) > DROP_CLUSTER_VERTICAL_RADIUS) continue;
+      const stack = itemEntityStack(entity);
+      if (stack && DROP_RECIPE_IDS.has(stack.typeId) && stack.amount >= 1) {
+        candidates.push({ entity, id: stack.typeId, amount: stack.amount, location: { x: p.x, y: p.y, z: p.z } });
+      }
+    } catch {}
+  }
+  return candidates;
+}
+
+function combineDroppedIngredients(dimension, anchor) {
+  if (!anchor?.isValid) return false;
+  const center = { x: anchor.location.x, y: anchor.location.y, z: anchor.location.z };
+  const candidates = droppedRecipeCandidates(dimension, center);
+  const groups = DROP_RECIPE.map((id) => candidates.filter((entry) => entry.id === id));
+  // Сначала проверяем ВСЕ ингредиенты. Неполный набор никогда не потребляется.
+  if (groups.some((group) => group.length === 0)) return false;
+  const selected = groups.map((group) => group[0]);
+  // Проверяем расстояние между ингредиентами, а не совпадение целых координат клетки.
+  if (selected.some((entry) => selected.some((other) =>
+    distanceSquared(entry.location, other.location) > DROP_CLUSTER_RADIUS ** 2))) return false;
+  for (const entry of selected) {
+    try {
+      if (!entry.entity.isValid || itemEntityStack(entry.entity)?.typeId !== entry.id) return false;
+    } catch { return false; }
+  }
+  const removed = [];
+  try {
+    for (const entry of selected) {
+      // kill() возвращает false для item entity. remove() действительно удаляет дроп.
+      entry.entity.remove();
+      removed.push(entry);
+    }
+  } catch (error) {
+    // При сбое удаления возвращаем уже списанное; результат не выдаём.
+    for (const entry of removed) {
+      try { dimension.spawnItem(new ItemStack(entry.id, entry.amount), entry.location); }
+      catch (rollbackError) { console.warn(`[Mana Machines] Не удалось вернуть ингредиент: ${rollbackError}`); }
+    }
+    console.warn(`[Mana Machines] Крафт на земле отменён: ${error}`);
+    return false;
+  }
+  for (const entry of selected) {
+    if (entry.amount <= 1) continue;
+    try { dimension.spawnItem(new ItemStack(entry.id, entry.amount - 1), entry.location); }
+    catch (error) { console.warn(`[Mana Machines] Не удалось вернуть остаток ингредиентов: ${error}`); }
+  }
+  try {
+    dimension.spawnItem(new ItemStack(BASE_STONE, 1), center);
+  } catch (error) {
+    // При ошибке результата возвращаем потреблённые единицы (остатки уже возвращены).
+    for (const entry of selected) {
+      try { dimension.spawnItem(new ItemStack(entry.id, 1), entry.location); } catch {}
+    }
+    console.warn(`[Mana Machines] Не удалось создать манакамень: ${error}`);
+    return false;
+  }
+  try {
+    dimension.playSound("random.orb", center);
+    dimension.spawnParticle("minecraft:enchanting_table_particle", { x: center.x, y: center.y + 0.2, z: center.z });
+  } catch {}
+  return true;
+}
+
+function scanDroppedRecipes() {
+  const checked = new Set();
+  for (const player of world.getAllPlayers()) {
+    let entities;
+    try {
+      entities = player.dimension.getEntities({
+        type: "minecraft:item", excludeTags: [DISPLAY_TAG], location: player.location, maxDistance: DROP_SCAN_RADIUS
+      });
+    } catch { continue; }
+    for (const entity of entities) {
+      try {
+        if (!entity.isValid || checked.has(entity.id) || entity.hasTag(DISPLAY_TAG)) continue;
+        const stack = itemEntityStack(entity);
+        if (!stack || !DROP_RECIPE_IDS.has(stack.typeId)) continue;
+        // Один крафт на набор за проход. Остатки стаков — новые энтити, которых
+        // нет в снимке entities; они будут обработаны следующим сканом через 10 тиков.
+        for (const nearby of droppedRecipeCandidates(player.dimension, entity.location)) checked.add(nearby.entity.id);
+        combineDroppedIngredients(player.dimension, entity);
+      } catch {}
+    }
   }
 }
 
-function combineDroppedStones(entity) {
-  if (!entity || entity.typeId !== "minecraft:item" || entity.hasTag(DISPLAY_TAG)) return;
-  const stack = itemEntityStack(entity);
-  if (!stack || !["minecraft:lapis_lazuli", "minecraft:gold_nugget", "minecraft:stone"].includes(stack.typeId)) return;
-  const lock = `${entity.dimension.id}|${Math.floor(entity.location.x)}|${Math.floor(entity.location.y)}|${Math.floor(entity.location.z)}`;
-  if (dropLocks.has(lock)) return;
-  dropLocks.add(lock);
-  system.runTimeout(() => {
-    try {
-      const items = entity.dimension.getEntities({ type: "minecraft:item", location: entity.location, maxDistance: 1.5 }).filter((candidate) => !candidate.hasTag(DISPLAY_TAG));
-      const byId = new Map();
-      for (const candidate of items) {
-        const item = itemEntityStack(candidate);
-        if (item) byId.set(item.typeId, { entity: candidate, stack: item });
-      }
-      const required = ["minecraft:lapis_lazuli", "minecraft:gold_nugget", "minecraft:stone"];
-      if (!required.every((id) => byId.get(id)?.stack.amount >= 1)) return;
-      for (const id of required) consumeEntityItem(byId.get(id).entity, 1);
-      entity.dimension.spawnItem(new ItemStack(BASE_STONE, 1), entity.location);
-    } catch {
-      // Предмет мог быть подобран/удалён за время таймаута — это не ошибка.
-    } finally {
-      dropLocks.delete(lock);
-    }
-  }, 1);
+function scheduleDropCheck(entity) {
+  let id;
+  try {
+    if (!entity?.isValid || entity.typeId !== "minecraft:item" || entity.hasTag(DISPLAY_TAG)) return;
+    id = entity.id;
+    if (pendingDropChecks.has(id)) return;
+    pendingDropChecks.add(id);
+    // Не читаем компонент в момент entitySpawn и не привязываемся к клетке.
+    // Через два тика предмет существует; периодический скан подстрахует пропущенное событие.
+    system.runTimeout(() => {
+      pendingDropChecks.delete(id);
+      try { combineDroppedIngredients(entity.dimension, entity); } catch {}
+    }, 2);
+  } catch {
+    if (id !== undefined) pendingDropChecks.delete(id);
+  }
 }
 
 function injectPotionLoot(event, container) {
@@ -704,7 +885,12 @@ world.afterEvents.blockExplode.subscribe((event) => {
 // Витринные предметы нельзя подбирать (аналог pickup_delay, которого нет в Script API).
 world.beforeEvents.entityItemPickup.subscribe((event) => {
   try {
-    if (event.item?.hasTag(DISPLAY_TAG)) event.cancel = true;
+    const item = event.item;
+    if (!item?.isValid) return;
+    if (item.hasTag(DISPLAY_TAG)) {
+      event.cancel = true;
+      return;
+    }
   } catch {}
 });
 
@@ -721,7 +907,20 @@ function stabilizeDisplays() {
       if (processed.has(entity.id)) continue;
       processed.add(entity.id);
       try {
-        const anchor = entity.getDynamicProperty(ANCHOR_KEY);
+        if (!entity.isValid) continue;
+        let anchor = entity.getDynamicProperty(ANCHOR_KEY);
+        // Переносим витрины с сохранённым владельцем/слотом на актуальные координаты.
+        // Совсем старые витрины v1.0.4 заменяются при следующем взаимодействии с машиной.
+        if (entity.getDynamicProperty(DISPLAY_VERSION_KEY) !== DISPLAY_LAYOUT_VERSION) {
+          const owner = entity.getDynamicProperty(DISPLAY_MACHINE_KEY);
+          const seat = entity.getDynamicProperty(DISPLAY_SLOT_KEY);
+          if (typeof owner === "string" && typeof seat === "string" && DISPLAY_SEATS[seat]) {
+            const location = machineLocation(owner);
+            anchor = displayAnchor(location, seat);
+            if (anchor) entity.setDynamicProperty(ANCHOR_KEY, anchor);
+          }
+          entity.setDynamicProperty(DISPLAY_VERSION_KEY, DISPLAY_LAYOUT_VERSION);
+        }
         if (!anchor || typeof anchor !== "object") continue;
         const p = entity.location;
         if (Math.abs(p.x - anchor.x) + Math.abs(p.y - anchor.y) + Math.abs(p.z - anchor.z) < 0.05) continue;
@@ -734,15 +933,16 @@ function stabilizeDisplays() {
 world.afterEvents.entitySpawn.subscribe((event) => {
   const item = itemEntityStack(event.entity);
   if (item?.typeId === "minecraft:enchanted_book") {
-    try { event.entity.kill(); } catch {}
+    try { event.entity.remove(); } catch {}
     return;
   }
-  combineDroppedStones(event.entity);
+  if (DROP_RECIPE_IDS.has(item?.typeId)) scheduleDropCheck(event.entity);
 });
 
 system.runInterval(() => {
   tickPlayers();
   if (system.currentTick % 2 === 0) stabilizeDisplays();
+  if (system.currentTick % DROP_SCAN_INTERVAL === 0) scanDroppedRecipes();
   if (system.currentTick % 20 === 0) chargeCondensers();
   if (system.currentTick % 100 === 0) {
     for (const [key, tick] of interactionCooldowns) {

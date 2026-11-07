@@ -100,12 +100,19 @@ const beforeEvents = Object.fromEntries([
   "playerInteractWithBlock", "entityItemPickup"
 ].map((name) => [name, signal()]));
 const startup = signal();
+// Скриптовые события — единственный канал между аддонами: dynamic properties
+// изолированы по UUID пака, поэтому внешний API маны построен на них.
+const scriptEventReceive = signal();
+const scriptEvents = [];
 const intervals = [];
 const timeouts = [];
 
 const system = {
   currentTick: 100,
   beforeEvents: { startup },
+  afterEvents: { scriptEventReceive },
+  // В игре событие уходит всем пакам; здесь просто копим, чтобы проверить ответ.
+  sendScriptEvent(id, message) { scriptEvents.push({ id, message }); return true; },
   runInterval(callback) { intervals.push(callback); return intervals.length; },
   runTimeout(callback) { timeouts.push(callback); return timeouts.length; },
   run(callback) { callback(); }
@@ -186,6 +193,7 @@ const container = {
 const playerProps = new Map();
 const player = {
   id: "player-1",
+  name: "Steve",
   typeId: "minecraft:player",
   dimension,
   location: { x: 0, y: 64, z: 0 },
@@ -212,7 +220,9 @@ const world = {
   getDynamicProperty(key) { return worldProps.get(key); },
   setDynamicProperty(key, value) { worldProps.set(key, value); },
   getAllPlayers() { return [player]; },
+  getEntity(id) { return id === player.id ? player : undefined; },
   getPlayers(options = {}) {
+    if (options.name !== undefined && options.name !== player.name) return [];
     const location = options.location ?? player.location;
     const maxDistance = options.maxDistance;
     if (maxDistance === undefined) return [player];
@@ -668,5 +678,99 @@ assert.equal(actionBars.at(-1), "", "action bar is cleared once after the error"
 const cleared = actionBars.length;
 context.tickPlayers();
 assert.equal(actionBars.length, cleared, "and is not cleared again on later ticks");
+
+// --- Внешний API маны для других аддонов (скриптовые события) ---
+const api = (id, message, extra = {}) => {
+  scriptEvents.length = 0;
+  scriptEventReceive.emit({ id, message, ...extra });
+  return scriptEvents;
+};
+
+playerProps.set("mana:value", 700);
+playerProps.set("mana:regen_ticks", 0);
+
+let events = api("mana:get", JSON.stringify({ player: player.name }));
+assert.equal(events.length, 1, "mana:get answers exactly once");
+assert.equal(events[0].id, "mana:balance", "mana:get answers with mana:balance");
+let payload = JSON.parse(events[0].message);
+assert.equal(payload.player, "Steve", "reply carries the player name");
+assert.equal(payload.id, "player-1", "reply carries the player id");
+assert.equal(payload.max, 1000, "reply carries the mana cap");
+assert.equal(payload.mana, 700, "mana:get reports the current mana");
+
+// Списание: маны хватает.
+events = api("mana:spend", JSON.stringify({ player: player.name, amount: 50 }));
+assert.equal(events[0].id, "mana:result", "mana:spend answers with mana:result");
+payload = JSON.parse(events[0].message);
+assert.equal(payload.ok, true, "enough mana -> ok");
+assert.equal(payload.spent, 50, "result reports the spent amount");
+assert.equal(payload.mana, 650, "result reports the new balance");
+assert.equal(playerProps.get("mana:value"), 650, "spend really takes mana from the player");
+
+// Списание: маны не хватает — баланс не трогаем.
+events = api("mana:spend", JSON.stringify({ player: player.name, amount: 5000 }));
+payload = JSON.parse(events[0].message);
+assert.equal(payload.ok, false, "not enough mana -> not ok");
+assert.equal(payload.need, 5000, "result reports how much was needed");
+assert.equal(payload.mana, 650, "failed spend leaves the balance alone");
+assert.equal(playerProps.get("mana:value"), 650, "and does not touch the stored value");
+
+// Начисление и установка; игрока можно указывать и по id.
+api("mana:add", JSON.stringify({ player: player.id, amount: 100 }));
+assert.equal(playerProps.get("mana:value"), 750, "mana:add works with the entity id too");
+api("mana:set", JSON.stringify({ player: player.name, amount: 123 }));
+assert.equal(playerProps.get("mana:value"), 123, "mana:set overwrites the balance");
+
+// Короткая форма из чата: /scriptevent mana:add 25 — игрок из sourceEntity.
+events = api("mana:add", "25", { sourceEntity: player });
+assert.equal(JSON.parse(events[0].message).mana, 148, "/scriptevent mana:add 25 works without JSON");
+
+// Внешние значения обрезаются по MAX_MANA тем же setMana.
+api("mana:set", JSON.stringify({ player: player.name, amount: 99999 }));
+assert.equal(playerProps.get("mana:value"), 1000, "external writes are clamped to MAX_MANA");
+
+// Чужое и битое — молча игнорируем, ничего не отвечаем и не меняем баланс.
+assert.equal(api("other:get", JSON.stringify({ player: player.name })).length, 0,
+  "events from other namespaces are ignored");
+assert.equal(api("mana:get", JSON.stringify({ player: "Herobrine" })).length, 0,
+  "unknown player is ignored");
+assert.equal(api("mana:spend", "{не json").length, 0, "broken payload without a player is ignored");
+assert.equal(playerProps.get("mana:value"), 1000, "ignored events do not change the balance");
+
+// Рассылка mana:changed: один раз на изменение и ни одного, пока мана стоит.
+scriptEvents.length = 0;
+context.tickPlayers();
+let changed = scriptEvents.filter((entry) => entry.id === "mana:changed");
+assert.equal(changed.length, 1, "mana:changed is broadcast once when the balance changes");
+payload = JSON.parse(changed[0].message);
+assert.equal(payload.mana, 1000, "broadcast carries the new mana");
+assert.equal(payload.regen, false, "broadcast reports the regen flag");
+
+scriptEvents.length = 0;
+context.tickPlayers();
+changed = scriptEvents.filter((entry) => entry.id === "mana:changed");
+assert.equal(changed.length, 0, "no mana:changed while the balance stands still");
+
+// Ускоренное восстановление видно наружу.
+playerProps.set("mana:value", 500);
+playerProps.set("mana:regen_ticks", 100);
+scriptEvents.length = 0;
+context.tickPlayers();
+changed = scriptEvents.filter((entry) => entry.id === "mana:changed");
+assert.equal(changed.length, 1, "mana:changed fires for the new value");
+assert.equal(JSON.parse(changed[0].message).regen, true, "broadcast reports active regen");
+
+// Клиентский приёмник: чужой аддон подписывается и видит те же события.
+const seen = [];
+scriptEventReceive.subscribe((event) => {
+  if (event.id === "mana:changed") seen.push(JSON.parse(event.message).mana);
+}, { namespaces: ["mana"] });
+playerProps.set("mana:value", 300);
+scriptEvents.length = 0;
+context.tickPlayers();
+const outgoing = scriptEvents.filter((entry) => entry.id === "mana:changed");
+for (const entry of outgoing) scriptEventReceive.emit(entry);
+assert.deepEqual(seen, [JSON.parse(outgoing[0].message).mana],
+  "a foreign addon receives mana:changed through the shared event bus");
 
 console.log("runtime-smoke: OK");

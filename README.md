@@ -472,13 +472,87 @@ c `array_name: "controls"`, но якорь `where: {control_name: ...}` в кл
 надо. Если предмет всё же хочется сместить — правятся четыре числа в
 `DISPLAY_SEATS` (и версия раскладки, чтобы старые витрины переехали).
 
+### 19. v1.0.19: внешний API маны для других аддонов
+
+Другой аддон может узнать баланс маны, начислить её или списать. Обмен идёт
+через **скриптовые события** — это единственный штатный канал между аддонами.
+
+**Почему нельзя просто прочитать значение.** Мана лежит в dynamic property
+игрока `mana:value`, но dynamic properties привязаны к UUID бихевиор-пака:
+чужой аддон не увидит этот ключ, даже зная его имя, — `getDynamicProperty`
+вернёт `undefined`.
+
+#### События
+
+| Событие | Кто шлёт | Сообщение | Что делает | Ответ |
+| --- | --- | --- | --- | --- |
+| `mana:get` | другой аддон | `{"player":"Steve"}` | — | `mana:balance` |
+| `mana:set` | другой аддон | `{"player":"Steve","amount":500}` | ставит значение | `mana:balance` |
+| `mana:add` | другой аддон | `{"player":"Steve","amount":100}` | прибавляет | `mana:balance` |
+| `mana:spend` | другой аддон | `{"player":"Steve","amount":50}` | списывает, если хватает | `mana:result` |
+| `mana:changed` | этот аддон | — (рассылка) | — | — |
+
+Полезная нагрузка ответа — JSON-строка: `{ player, id, max: 1000, mana }`.
+`mana:result` добавляет `ok`, `spent`, а при нехватке — `need`. Рассылка
+`mana:changed` улетает один раз на каждое изменение: `{ player, id, max, mana, regen }`.
+
+Правила:
+
+- игрока можно указать **по имени** (`player: "Steve"`) или **по id** (`player: "-4293..."`);
+  если `player` не передан, берётся тот, кто выполнил команду;
+- значения обрезаются до `0…1000` тем же `setMana`, дроби отбрасываются;
+- не хватает маны — приходит `ok: false`, баланс **не** меняется;
+- ответ приходит в **следующем тике**: API асинхронный, сразу после
+  `sendScriptEvent` значения ещё нет;
+- чужие события, неизвестные игроки и битый JSON игнорируются молча.
+
+#### Код для второго аддона
+
+```js
+import { system, world } from "@minecraft/server";
+
+const balance = new Map(); // id игрока -> мана
+
+// Приёмник: слушаем только неймспейс mana, чтобы не задевать чужие события.
+system.afterEvents.scriptEventReceive.subscribe((event) => {
+  if (event.id !== "mana:balance" && event.id !== "mana:result" && event.id !== "mana:changed") return;
+  let payload;
+  try { payload = JSON.parse(event.message); } catch { return; }
+  if (typeof payload.mana === "number") balance.set(payload.id ?? payload.player, payload.mana);
+  if (event.id === "mana:result" && payload.ok === false) {
+    // Маны не хватило: нужно было payload.need, есть payload.mana.
+  }
+}, { namespaces: ["mana"] });
+
+const send = (id, message) => system.sendScriptEvent(id, JSON.stringify(message));
+export const askMana   = (pl) => send("mana:get",   { player: pl.id });
+export const spendMana = (pl, n) => send("mana:spend", { player: pl.id, amount: n });
+export const addMana   = (pl, n) => send("mana:add",   { player: pl.id, amount: n });
+```
+
+Оба пака должны быть включены в один мир. ID события обязан быть с неймспейсом,
+но не `minecraft` — поэтому `mana:*` подходит.
+
+#### Ручной вызов из чата
+
+Нужны читы:
+
+```
+/scriptevent mana:get {"player":"Steve"}
+/scriptevent mana:spend 50
+/scriptevent mana:add 25
+```
+
+Во второй и третьей форме сообщение — просто число, а игрок берётся из того,
+кто выполнил команду.
+
 ## Сборка и установка
 
 ```bash
 python3 build.py
 ```
 
-Полученный `Mana_Machines_v1.0.18.mcaddon` откройте в Minecraft (двойной клик или
+Полученный `Mana_Machines_v1.0.19.mcaddon` откройте в Minecraft (двойной клик или
 «Открыть с помощью Minecraft»). Старую версию пака перед импортом лучше удалить,
 чтобы не было конфликта UUID.
 

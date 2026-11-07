@@ -599,4 +599,31 @@ const published = titles.map((entry) => entry.text).filter((text) => text.starts
 assert.equal(published.length, 1, "player tick publishes the bar value once");
 assert.equal(publishedValue(published[0]), "13", "250 of 1000 mana is published as step 13");
 
+// Экспериментальная раскладка: те же цели одной операцией replace по
+// control_name. Лежит отдельным файлом, потому что в клиенте такой файл был
+// отклонён целиком (v1.0.13) — основной hud_screen.json остаётся рабочим.
+const experimental = JSON.parse(fs.readFileSync(
+  path.join(root, "experimental", "hud_screen_replace.json"), "utf8"));
+{
+  const [bar, level] = experimental.root_panel.modifications[0].value;
+  assert.deepEqual(bar.mana_bar_panel.offset, [0, -32], "experiment: bar flush above the xp bar");
+  assert.deepEqual(level.mana_level_text.offset, [-107, -26], "experiment: level number moved aside");
+  for (const [container, hungerX] of [
+    ["centered_gui_elements_at_bottom_middle", 180],
+    ["centered_gui_elements_at_bottom_middle_touch", 200]
+  ]) {
+    const replaced = Object.fromEntries(experimental[container].modifications
+      .map((entry) => [entry.control_name, entry.value[0][entry.control_name].offset]));
+    assert.deepEqual(replaced["heart_rend@heart_renderer"], [-1, -47], `${container}: hearts lifted`);
+    assert.deepEqual(replaced["hunger_rend@hunger_renderer"], [hungerX, -47], `${container}: hunger lifted`);
+  }
+  // Оригинал цифры уровня уводится только по y: родитель размера "100%c".
+  for (const parent of ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+    "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]) {
+    const entry = experimental[parent].modifications[0];
+    assert.deepEqual(entry.value[0][entry.control_name].offset, [0, -500],
+      `${parent}: level label moved away vertically only`);
+  }
+}
+
 console.log("runtime-smoke: OK");

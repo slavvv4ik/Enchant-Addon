@@ -11,6 +11,7 @@ const MACHINES_KEY = "mana:machines";
 const DISPLAY_TAG = "mana_machine_display";
 const ANCHOR_KEY = "mana:display_anchor";
 const MACHINE_IDS = new Set(["mana:condenser", "mana:anvil", "mana:fusion"]);
+const MACHINE_COMPONENT_ID = "mana:machine_interaction";
 const FULL_STONE = "mana:full_manastone";
 const BASE_STONE = "mana:manastone";
 
@@ -53,6 +54,7 @@ let machinesLoaded = false;
 let lootSeen = new Set();
 let lootSeenLoaded = false;
 const dropLocks = new Set();
+const interactionCooldowns = new Map();
 
 function loadMachines() {
   if (machinesLoaded) return;
@@ -176,7 +178,14 @@ function normalizeEnchantId(id) {
 function enchantmentType(id) {
   const bare = normalizeEnchantId(id);
   if (!bare) return undefined;
-  return EnchantmentTypes.get(bare) ?? EnchantmentTypes.get(`minecraft:${bare}`);
+  // В разных версиях Bedrock ID может быть с префиксом или без; get() также может бросить исключение.
+  for (const candidate of [`minecraft:${bare}`, bare]) {
+    try {
+      const type = EnchantmentTypes.get(candidate);
+      if (type) return type;
+    } catch {}
+  }
+  return undefined;
 }
 
 function stackLevel(stack) {
@@ -462,15 +471,28 @@ function checkCondenser(player, dimension, location, data) {
   }
 }
 
+function interactWithMachine(player, dimension, location, typeId) {
+  if (!player || !MACHINE_IDS.has(typeId)) return;
+  const key = machineKey(dimension, location);
+  const cooldownKey = `${player.id}|${key}`;
+  const now = system.currentTick;
+  const last = interactionCooldowns.get(cooldownKey);
+  // Одно нажатие может прийти и из custom component, и из world.beforeEvents/afterEvents.
+  // Не даём одному нажатию дважды вставить/забрать предмет.
+  if (last !== undefined && now - last < 5) return;
+  interactionCooldowns.set(cooldownKey, now);
+  const { data } = getMachine(dimension, location, typeId);
+  if (typeId === "mana:condenser") checkCondenser(player, dimension, location, data);
+  else if (typeId === "mana:anvil") checkAnvil(player, dimension, location, data);
+  else checkFusion(player, dimension, location, data);
+}
+
 function handleMachineInteraction(event) {
-  if (!event.isFirstEvent) return;
+  if (event.isFirstEvent === false) return;
   const player = event.player;
   const block = event.block;
-  if (!player || !block || !MACHINE_IDS.has(block.typeId)) return;
-  const { data } = getMachine(block.dimension, block.location, block.typeId);
-  if (block.typeId === "mana:condenser") checkCondenser(player, block.dimension, block.location, data);
-  else if (block.typeId === "mana:anvil") checkAnvil(player, block.dimension, block.location, data);
-  else checkFusion(player, block.dimension, block.location, data);
+  if (!player || !block) return;
+  interactWithMachine(player, block.dimension, block.location, block.typeId);
 }
 
 function initializePlacedMachine(event) {
@@ -637,6 +659,33 @@ function removeStoredMachineDrops(dimension, location, blockType) {
   clearMachine(key);
 }
 
+// Обычные кастомные блоки без interact-компонента не вызывают playerInteractWithBlock.
+// Регистрируем Custom Component V2, чтобы блоки машин стали интерактивными.
+system.beforeEvents.startup.subscribe((event) => {
+  event.blockComponentRegistry.registerCustomComponent(MACHINE_COMPONENT_ID, {
+    onPlayerInteract({ block, dimension, player }) {
+      if (!player) return;
+      interactWithMachine(player, dimension, block.location, block.typeId);
+    },
+    onPlace({ block, dimension }) {
+      getMachine(dimension, block.location, block.typeId);
+    }
+  });
+});
+
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const block = event.block;
+  const player = event.player;
+  if (!player || !block || !MACHINE_IDS.has(block.typeId)) return;
+  // Отменяем стандартное использование предмета (например, установку блока или ведро воды),
+  // чтобы клик по машине всегда обрабатывался как взаимодействие с машиной.
+  event.cancel = true;
+  if (event.isFirstEvent === false) return;
+  const dimension = block.dimension;
+  const location = { x: block.location.x, y: block.location.y, z: block.location.z };
+  const typeId = block.typeId;
+  system.run(() => interactWithMachine(player, dimension, location, typeId));
+});
 world.afterEvents.playerInteractWithBlock.subscribe(handleMachineInteraction);
 world.afterEvents.playerPlaceBlock.subscribe(initializePlacedMachine);
 world.afterEvents.itemCompleteUse.subscribe(completePotion);
@@ -695,4 +744,9 @@ system.runInterval(() => {
   tickPlayers();
   if (system.currentTick % 2 === 0) stabilizeDisplays();
   if (system.currentTick % 20 === 0) chargeCondensers();
+  if (system.currentTick % 100 === 0) {
+    for (const [key, tick] of interactionCooldowns) {
+      if (system.currentTick - tick > 20) interactionCooldowns.delete(key);
+    }
+  }
 }, 1);

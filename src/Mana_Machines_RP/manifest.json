@@ -1,0 +1,13 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Mana Machines RP",
+    "description": "Textures and models for Mana Machines",
+    "uuid": "9e9f0b3c-ef3e-4a2b-ae48-2a4f76d6b2d1",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 26, 0]
+  },
+  "modules": [
+    {"type":"resources","uuid":"9e9f0b3c-ef3e-4a2b-ae48-2a4f76d6b2d2","version":[1,0,0]}
+  ]
+}

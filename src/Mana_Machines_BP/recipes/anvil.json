@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:recipe_shaped": {
+    "description": { "identifier": "mana:recipe_anvil" },
+    "tags": [ "crafting_table" ],
+    "pattern": [ "III", "OGO", "DDD" ],
+    "key": {
+      "I": { "item": "minecraft:iron_block" },
+      "G": { "item": "minecraft:gold_block" },
+      "O": { "item": "minecraft:obsidian" },
+      "D": { "item": "minecraft:diamond" }
+    },
+    "unlock": [
+      { "item": "minecraft:obsidian" }
+    ],
+    "result": { "item": "mana:anvil", "count": 1 }
+  }
+}

@@ -198,12 +198,13 @@ const player = {
   addLevels(amount) { this.level += amount; return this.level; },
   playSound() {},
   onScreenDisplay: {
-    setActionBar() {},
+    setActionBar(text) { actionBars.push(text); },
     setTitle(text, options) { titles.push({ text, options }); }
   }
 };
 
 const titles = [];
+const actionBars = [];
 
 const world = {
   afterEvents,
@@ -260,6 +261,18 @@ for (const name of ["anvil", "condenser", "fusion"]) {
   const block = JSON.parse(fs.readFileSync(path.join(bp, "blocks", `${name}.json`), "utf8"));
   assert.ok(block.format_version >= "1.21.90", `${name} format supports custom components V2`);
   assert.ok(block["minecraft:block"].components["mana:machine_interaction"], `${name} binds interaction component`);
+  // Регрессия: без ключа tile.<namespace>:<блок>.name в руках блок назывался
+  // сырой строкой вида "tile....", а переводы лежали с ключами через точки.
+  const blockId = block["minecraft:block"].description.identifier;
+  const nameKey = `tile.${blockId}.name`;
+  assert.equal(block["minecraft:block"].components["minecraft:display_name"], nameKey,
+    `${blockId} points at its lang key`);
+  for (const language of ["en_US", "ru_RU"]) {
+    const lang = fs.readFileSync(path.join(root, "src", "Mana_Machines_RP", "texts", `${language}.lang`), "utf8");
+    const line = lang.split("\n").find((entry) => entry.startsWith(`${nameKey}=`));
+    assert.ok(line, `${language}.lang defines ${nameKey}`);
+    assert.ok(line.split("=").slice(1).join("=").trim().length > 0, `${language}.lang: name is not empty`);
+  }
 }
 
 // Клик по конденсатору с манакамнем в руке должен вставить камень.
@@ -628,5 +641,30 @@ const experimental = JSON.parse(fs.readFileSync(
       `${parent}: level label moved away vertically only`);
   }
 }
+
+// Экшен-бар: ману теперь показывает полоса в HUD, поэтому в строке остаются
+// только сообщения об ошибках, а после них строка очищается один раз.
+playerProps.set("mana:value", 700);
+playerProps.set("mana:regen_ticks", 0);
+playerProps.set("mana:error_ticks", 0);
+context.tickPlayers();          // первый тик гасит строку от прежних ошибок
+actionBars.length = 0;
+context.tickPlayers();
+assert.equal(actionBars.length, 0, "no mana readout in the action bar any more");
+
+context.showError(player, "Не хватает маны");
+context.tickPlayers();
+assert.ok(actionBars.at(-1).includes("Не хватает маны"), "error message is still shown");
+assert.ok(!actionBars.at(-1).includes("1000"), "action bar shows no mana numbers");
+
+// Сообщение гаснет — строку очищаем ровно один раз, а не каждый тик.
+playerProps.set("mana:error_ticks", 1);
+context.tickPlayers();
+assert.ok(actionBars.at(-1).includes("Не хватает маны"), "last tick of the error still shows it");
+context.tickPlayers();
+assert.equal(actionBars.at(-1), "", "action bar is cleared once after the error");
+const cleared = actionBars.length;
+context.tickPlayers();
+assert.equal(actionBars.length, cleared, "and is not cleared again on later ticks");
 
 console.log("runtime-smoke: OK");

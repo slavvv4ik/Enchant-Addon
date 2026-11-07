@@ -47,7 +47,8 @@
           "render_method": "opaque"
         }
       },
-      "mana:machine_interaction": {}
+      "mana:machine_interaction": {},
+      "minecraft:display_name": "tile.mana:condenser.name"
     }
   }
 }

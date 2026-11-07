@@ -86,6 +86,7 @@ let lootSeen = new Set();
 let lootSeenLoaded = false;
 const pendingDropChecks = new Set();
 const manaBarPublished = new Map();
+const errorBarShown = new Set();
 const interactionCooldowns = new Map();
 
 function loadMachines() {
@@ -193,7 +194,8 @@ function stoneMaxLevel(id) {
   const info = stones[id];
   if (!info) return 1;
   const type = enchantmentType(info.enchant);
-  const apiMax = type?.maxLevel;
+  // Number() вместо undefined: проверка ниже тогда всегда видит число.
+  const apiMax = Number(type?.maxLevel);
   // Не превышаем ни ванильный предел таблицы, ни предел установленного реестра игры.
   return Number.isInteger(apiMax) && apiMax > 0 ? Math.min(info.max, apiMax) : info.max;
 }
@@ -496,7 +498,7 @@ function completeFusion(player, dimension, location, data) {
   if (!data.left || !data.right) return false;
   const leftStone = stoneIds.has(data.left.id);
   const rightStone = stoneIds.has(data.right.id);
-  let result = null;
+  let result = /** @type {ItemStack | null} */ (null);
   if (leftStone && rightStone) {
     if (data.left.id !== data.right.id || (data.left.level || 1) !== (data.right.level || 1)) {
       fusionError(player, "Для повышения уровня нужны два одинаковых манакамня");
@@ -686,14 +688,17 @@ function tickPlayers() {
     if (system.currentTick % 40 === 0 && getMana(player) < MAX_MANA) {
       setMana(player, getMana(player) + (regenTicks > 0 ? 5 : 1));
     }
+    // Ману показывает полоса в HUD, поэтому в экшен-баре остаются только
+    // сообщения об ошибках. После последнего сообщения строку очищаем один
+    // раз — иначе она висит на экране.
     let errorTicks = Number(player.getDynamicProperty(ERROR_TICKS_KEY) || 0);
     if (errorTicks > 0) {
       errorTicks -= 1;
       player.setDynamicProperty(ERROR_TICKS_KEY, errorTicks);
       player.onScreenDisplay.setActionBar(`§c${player.getDynamicProperty(ERROR_KEY) || "Ошибка"}`);
-    } else {
-      const indicator = regenTicks > 0 ? " §d✦" : "";
-      player.onScreenDisplay.setActionBar(`§b${getMana(player)}/${MAX_MANA}${indicator}`);
+      errorBarShown.add(player.id);
+    } else if (errorBarShown.delete(player.id)) {
+      player.onScreenDisplay.setActionBar("");
     }
     // Значение публикуем только при изменении; раз в MANA_BAR_HEARTBEAT тиков
     // шлём принудительно, если движок успел очистить строку заголовка.

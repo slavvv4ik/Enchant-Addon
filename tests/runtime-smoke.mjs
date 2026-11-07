@@ -470,7 +470,18 @@ const hudText = fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8");
 assert.equal(hud.namespace, undefined, "hud merge file must not declare its own namespace");
 assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
 
-// Полоса привязана к ванильной группе опыта: обычной и карманной раскладки.
+// Регрессия: вставка внутрь resizing_xp_bar_with_hotbar ломает раскладку
+// ванильной полосы опыта — у неё ширина "100%c" (от содержимого), и дочерняя
+// ширина "100%" даёт круговую зависимость. Вставлять можно только в root_panel.
+for (const banned of [
+  "exp_progress_bar_and_hotbar",
+  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar",
+  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"
+]) {
+  assert.equal(hud[banned], undefined, `${banned} must not be modified`);
+}
+
 function findControl(node, name) {
   if (!node || typeof node !== "object") return null;
   if (Array.isArray(node)) {
@@ -488,24 +499,17 @@ function findControl(node, name) {
   return null;
 }
 
-for (const target of [
-  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
-  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar",
-  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"
-]) {
-  const modification = hud[target]?.modifications?.[0];
-  assert.ok(modification, `${target} is modified`);
-  assert.equal(modification.array_name, "controls");
-  assert.equal(modification.operation, "insert_back");
-  const panel = modification.value[0].mana_bar_panel;
-  assert.ok(panel, `${target} inserts the mana bar panel`);
-  assert.equal(panel.type, "panel");
-  assert.equal(panel.anchor_from, "bottom_middle", `${target}: bar is anchored above the xp strip`);
-  assert.equal(panel.anchor_to, "top_middle");
-}
-
-const barPanel = hud["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar"]
-  .modifications[0].value[0].mana_bar_panel;
+const rootMod = hud.root_panel.modifications[0];
+assert.equal(rootMod.array_name, "controls");
+assert.equal(rootMod.operation, "insert_back");
+const barPanel = rootMod.value[0].mana_bar_panel;
+assert.ok(barPanel, "mana bar panel is inserted into root_panel");
+assert.equal(barPanel.type, "panel");
+assert.deepEqual(barPanel.size, [182, 5], "bar is sized in pixels (percentages break inside content-sized parents)");
+assert.equal(barPanel.anchor_from, "bottom_middle");
+assert.equal(barPanel.anchor_to, "bottom_middle");
+// Полоса опыта на Pocket занимает 25..32 UI px над низом, держим зазор ~3 px.
+assert.deepEqual(barPanel.offset, [0, -35], "bar sits just above the vanilla xp bar");
 const barFill = findControl(barPanel, "mana_bar_fill");
 assert.ok(barFill, "fill image is defined inline");
 assert.equal(barFill.clip_direction, "left");

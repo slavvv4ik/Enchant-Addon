@@ -448,9 +448,9 @@ const rightAnchor = displayAnchor({ x: 5, y: 64, z: 5 }, "fusion_right");
 // X геометрии блока инвертирован к мировому X: левый слот модели x=-5 уходит на восток.
 assert.ok(Math.abs(leftAnchor.x - 5.8125) < 1e-6, `left seat x = 5.8125, got ${leftAnchor.x}`);
 assert.ok(Math.abs(rightAnchor.x - 5.1875) < 1e-6, `right seat x = 5.1875, got ${rightAnchor.x}`);
-assert.ok(Math.abs(leftAnchor.y - 64.8125) < 1e-6, `fusion seat y = 64.8125, got ${leftAnchor.y}`);
-assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "condenser").y - 64.678125) < 1e-6, "condenser seat sits on the bowl rim");
-assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "anvil").y - 65.15625) < 1e-6, "anvil seat sits on the sigil");
+assert.ok(Math.abs(leftAnchor.y - 64.5125) < 1e-6, `fusion seat y = 64.5125, got ${leftAnchor.y}`);
+assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "condenser").y - 64.378125) < 1e-6, "condenser seat is 0.3 blocks lower than before");
+assert.ok(Math.abs(displayAnchor({ x: 0, y: 64, z: 0 }, "anvil").y - 65) < 1e-6, "anvil seat sits below the hammer");
 
 entities.length = 0;
 inventorySlots.clear();
@@ -462,10 +462,12 @@ component.onPlayerInteract({ block: anvilBlock, dimension, player });
 const displays = dimension.getEntities({ type: "minecraft:item", tags: ["mana_machine_display"] });
 assert.equal(displays.length, 1, "anvil shows exactly one display item");
 const seat = displays[0].getDynamicProperty("mana:display_anchor");
-assert.ok(Math.abs(seat.x - 2.5) < 1e-6 && Math.abs(seat.z - 2.5) < 1e-6, "anvil display is centered over the block");
-assert.ok(Math.abs(seat.y - 65.15625) < 1e-6, "anvil display sits on the sigil, not above the block");
+assert.ok(Math.abs(seat.x - 2.5) < 1e-6, "anvil display stays on the block axis");
+// Молот наковальни занимает z от -1.8 до 1.8 px, то есть +-0.1125 блока от central.
+assert.ok(seat.z - 2.5 > 0.1125, "anvil display is in front of the hammer, not inside it");
+assert.ok(Math.abs(seat.y - 65) < 1e-6, "anvil display sits below the hammer");
 assert.equal(displays[0].getDynamicProperty("mana:display_machine"), "minecraft_overworld|2|64|2", "display is bound to its machine");
-assert.equal(displays[0].getDynamicProperty("mana:display_version"), 2, "display layout version is recorded");
+assert.equal(displays[0].getDynamicProperty("mana:display_version"), 3, "display layout version is recorded");
 
 // Витринный предмет нельзя подобрать.
 const pickupEvent = { item: displays[0], cancel: false };

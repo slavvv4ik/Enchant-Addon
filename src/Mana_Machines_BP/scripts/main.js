@@ -13,7 +13,7 @@ const ANCHOR_KEY = "mana:display_anchor";
 const DISPLAY_MACHINE_KEY = "mana:display_machine";
 const DISPLAY_SLOT_KEY = "mana:display_slot";
 const DISPLAY_VERSION_KEY = "mana:display_version";
-const DISPLAY_LAYOUT_VERSION = 2;
+const DISPLAY_LAYOUT_VERSION = 3;
 // Полоса маны в HUD (RP ui/hud_screen.json) не имеет доступа к скриптовым данным:
 // единственный канал, который читает JSON UI — это строка заголовка
 // (#hud_title_text_string). Значение передаём маркером "MM:<шаг>", где шаг
@@ -39,11 +39,14 @@ const DROP_CLUSTER_VERTICAL_RADIUS = 1;
 const DROP_SCAN_INTERVAL = 10;
 // Координаты моделей в пикселях (16 px = 1 блок). X модели инвертирован к мировому X.
 // У слияния используем pivot item_slot_left/right; у остальных — центр чаши/сигила.
+// Высоты подобраны по моделям (16 px = 1 блок). Наковальня: молот висит на
+// y 19..27.8 px и занимает z от -1.8 до 1.8, поэтому предмет уходит вперёд по
+// z на 4 px — иначе он оказывается внутри молота.
 const DISPLAY_SEATS = {
-  condenser: { x: 0, y: 8.85, z: 0 },
-  anvil: { x: 0, y: 16.5, z: 0 },
-  fusion_left: { x: -5, y: 11, z: 0 },
-  fusion_right: { x: 5, y: 11, z: 0 }
+  condenser: { x: 0, y: 4.05, z: 0 },
+  anvil: { x: 0, y: 14, z: 4 },
+  fusion_left: { x: -5, y: 6.2, z: 0 },
+  fusion_right: { x: 5, y: 6.2, z: 0 }
 };
 
 const stones = {

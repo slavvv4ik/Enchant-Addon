@@ -505,11 +505,28 @@ assert.equal(rootMod.operation, "insert_back");
 const barPanel = rootMod.value[0].mana_bar_panel;
 assert.ok(barPanel, "mana bar panel is inserted into root_panel");
 assert.equal(barPanel.type, "panel");
-assert.deepEqual(barPanel.size, [182, 5], "bar is sized in pixels (percentages break inside content-sized parents)");
+assert.deepEqual(barPanel.size, [200, 5], "bar is sized in pixels and matches the measured xp bar width");
 assert.equal(barPanel.anchor_from, "bottom_middle");
 assert.equal(barPanel.anchor_to, "bottom_middle");
-// Полоса опыта на Pocket занимает 25..32 UI px над низом, держим зазор ~3 px.
-assert.deepEqual(barPanel.offset, [0, -35], "bar sits just above the vanilla xp bar");
+// Замер по скриншоту Pocket (px от низа экрана): хотбар 8..117, полоса опыта
+// 130..154 (ширина 990 px), сердца и голод 163..201. Полосу ставим вплотную
+// над полосой опыта, а сердца и голод поднимаем на 7 UI px.
+assert.deepEqual(barPanel.offset, [0, -32], "bar sits flush above the vanilla xp bar");
+
+// Сердца и голод поднимаются, иначе полоса перекрывает их.
+for (const [container, hungerX] of [
+  ["centered_gui_elements_at_bottom_middle", 180],
+  ["centered_gui_elements_at_bottom_middle_touch", 200]
+]) {
+  const mods = hud[container].modifications;
+  const lifted = Object.fromEntries(mods.map((entry) => [entry.where.control_name, entry.value[0][entry.where.control_name]]));
+  assert.deepEqual(lifted["heart_rend@heart_renderer"].offset, [-1, -47], `${container}: hearts lifted by 7 UI px`);
+  assert.deepEqual(lifted["hunger_rend@hunger_renderer"].offset, [hungerX, -47], `${container}: hunger lifted by 7 UI px`);
+  for (const entry of mods) {
+    assert.equal(entry.operation, "replace", `${container}: control is replaced, not re-created`);
+    assert.equal(entry.array_name, "controls");
+  }
+}
 const barFill = findControl(barPanel, "mana_bar_fill");
 assert.ok(barFill, "fill image is defined inline");
 assert.equal(barFill.clip_direction, "left");
@@ -520,9 +537,10 @@ assert.ok(barFill.bindings.some((entry) => entry.target_property_name === "#clip
 assert.ok(barFill.bindings.some((entry) => String(entry.source_property_name).includes("'MM:'")),
   "fill strips the service marker from the title string");
 
+// Текстуры рисуются 1:1 с панелью, иначе рамка размывается при растяжении.
 for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
   const data = fs.readFileSync(path.join(rp, "textures", "ui", `${name}.png`));
-  assert.equal(data.readUInt32BE(16), 182, `${name}.png is 182 px wide`);
+  assert.equal(data.readUInt32BE(16), 200, `${name}.png is 200 px wide, same as the bar`);
   assert.equal(data.readUInt32BE(20), 5, `${name}.png is 5 px tall`);
 }
 // Наш служебный заголовок не должен быть виден игроку.

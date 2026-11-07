@@ -10,13 +10,13 @@
        "type": "panel",
        "size": [
         200,
-        5
+        2
        ],
        "anchor_from": "bottom_middle",
        "anchor_to": "bottom_middle",
        "offset": [
         0,
-        -44
+        -24
        ],
        "layer": 8,
        "controls": [

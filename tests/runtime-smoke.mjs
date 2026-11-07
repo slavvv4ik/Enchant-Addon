@@ -509,14 +509,17 @@ assert.equal(rootMod.operation, "insert_back");
 const barPanel = rootMod.value[0].mana_bar_panel;
 assert.ok(barPanel, "mana bar panel is inserted into root_panel");
 assert.equal(barPanel.type, "panel");
-assert.deepEqual(barPanel.size, [200, 5], "bar is sized in pixels and matches the measured xp bar width");
+// Ширина 200 px = ширина ванильной полосы опыта. Высота 2 UI px: полосу
+// просят поставить между хотбаром и полосой опыта, а там всего ~2.6 UI px.
+assert.deepEqual(barPanel.size, [200, 2], "bar matches the xp bar width and fits the gap in height");
 assert.equal(barPanel.anchor_from, "bottom_middle");
 assert.equal(barPanel.anchor_to, "bottom_middle");
 // Замер по скриншоту Pocket (px от низа экрана): хотбар 8..117, полоса опыта
-// 130..154 (ширина 990 px = 200 UI px), сердца и голод 163..201, цифра уровня
-// примерно 154..180. Оригиналы сердец и голода сдвинуть нельзя, поэтому
-// полосу ставим выше них: низ на 44 UI px = 218 px, зазор до сердец ~17 px.
-assert.deepEqual(barPanel.offset, [0, -44], "bar sits above hearts, hunger and the level number");
+// 130..154 (ширина 990 px = 200 UI px), цифра уровня примерно 156..182,
+// сердца и голод 163..201. Полоса встаёт в зазор между хотбаром и полосой
+// опыта: 117..130 px = 2.6 UI px. Низ на 24 UI px = 118.7 px, тогда полоса
+// занимает 118.7..128.6 px — до хотбара 1.7 px, до полосы опыта 1.4 px.
+assert.deepEqual(barPanel.offset, [0, -24], "bar sits in the gap between hotbar and xp bar");
 
 // Заливка — набор картинок, по одной на шаг: деление в JSON UI не понадобится,
 // достаточно сравнения целых чисел. Шаг 0 (мана пуста) картинки не имеет.
@@ -550,7 +553,7 @@ assert.equal(new Set(fillNames).size, fillNames.length, "fill control names are 
 for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
   const data = fs.readFileSync(path.join(rp, "textures", "ui", `${name}.png`));
   assert.equal(data.readUInt32BE(16), 200, `${name}.png is 200 px wide, same as the bar`);
-  assert.equal(data.readUInt32BE(20), 5, `${name}.png is 5 px tall`);
+  assert.equal(data.readUInt32BE(20), 2, `${name}.png is 2 px tall, same as the bar`);
 }
 
 // Служебный заголовок игроку не показываем: без этого на экране виден "MM:50".

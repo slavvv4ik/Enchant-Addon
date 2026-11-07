@@ -470,14 +470,29 @@ const hudText = fs.readFileSync(path.join(rp, "ui", "hud_screen.json"), "utf8");
 assert.equal(hud.namespace, undefined, "hud merge file must not declare its own namespace");
 assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
 
-// Регрессия: вставка внутрь resizing_xp_bar_with_hotbar ломает раскладку
-// ванильной полосы опыта — у неё ширина "100%c" (от содержимого), и дочерняя
-// ширина "100%" даёт круговую зависимость. Вставлять можно только в root_panel.
+// Регрессия: внутри цепочки ванильной полосы опыта родители размера "100%c"
+// (по содержимому), и дочерняя ширина "100%" даёт круговую зависимость: панель
+// схлопывается и ломает раскладку. Вставлять туда можно только контролы без
+// собственного размера (подпись сама считает размер по тексту).
+for (const [parent, controls] of [
+  ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+    hud["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar"]],
+  ["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar",
+    hud["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]]
+]) {
+  for (const entry of controls.modifications) {
+    for (const item of entry.value) {
+      for (const [name, control] of Object.entries(item)) {
+        assert.equal(control.size, undefined, `${parent}/${name} must not set its own size`);
+      }
+    }
+  }
+}
+// Сами панели группы опыта не трогаем вообще.
 for (const banned of [
   "exp_progress_bar_and_hotbar",
-  "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
-  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar",
-  "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"
+  "exp_progress_bar_and_hotbar_pocket",
+  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar"
 ]) {
   assert.equal(hud[banned], undefined, `${banned} must not be modified`);
 }
@@ -509,33 +524,37 @@ assert.deepEqual(barPanel.size, [200, 5], "bar is sized in pixels and matches th
 assert.equal(barPanel.anchor_from, "bottom_middle");
 assert.equal(barPanel.anchor_to, "bottom_middle");
 // Замер по скриншоту Pocket (px от низа экрана): хотбар 8..117, полоса опыта
-// 130..154 (ширина 990 px), сердца и голод 163..201. Полосу ставим вплотную
-// над полосой опыта, а сердца и голод поднимаем на 7 UI px.
+// 130..154 (ширина 990 px = 200 UI px), сердца и голод 163..201. Полосу ставим
+// вплотную над полосой опыта, сердца и голод поднимаем на 7 UI px.
 assert.deepEqual(barPanel.offset, [0, -32], "bar sits flush above the vanilla xp bar");
 
-// Сердца и голод поднимаются, иначе полоса перекрывает их.
-for (const [container, hungerX] of [
-  ["centered_gui_elements_at_bottom_middle", 180],
-  ["centered_gui_elements_at_bottom_middle_touch", 200]
-]) {
-  const mods = hud[container].modifications;
-  const lifted = Object.fromEntries(mods.map((entry) => [entry.where.control_name, entry.value[0][entry.where.control_name]]));
-  assert.deepEqual(lifted["heart_rend@heart_renderer"].offset, [-1, -47], `${container}: hearts lifted by 7 UI px`);
-  assert.deepEqual(lifted["hunger_rend@hunger_renderer"].offset, [hungerX, -47], `${container}: hunger lifted by 7 UI px`);
-  for (const entry of mods) {
-    assert.equal(entry.operation, "replace", `${container}: control is replaced, not re-created`);
-    assert.equal(entry.array_name, "controls");
-  }
+// Заливка — набор картинок, по одной на шаг: деление в JSON UI не понадобится,
+// достаточно сравнения целых чисел. Шаг 0 (мана пуста) картинки не имеет.
+const STEPS = 50;
+const fills = findControl(barPanel, "mana_bar_empty").controls;
+assert.equal(fills.length, STEPS * 2, "one fill image per step, plus a regen variant");
+const widths = new Set();
+for (const item of fills) {
+  const [name, control] = Object.entries(item)[0];
+  assert.equal(control.type, "image");
+  const visible = control.bindings.find((entry) => entry.target_property_name === "#visible");
+  const value = Number(visible.source_property_name.match(/= (\d+)\)/)[1]);
+  const regen = name.includes("regen");
+  assert.ok(value >= 1 && value <= STEPS + (regen ? 1000 : 0), `${name}: value in range`);
+  const step = regen ? value - 1000 : value;
+  assert.equal(control.texture, regen ? "textures/ui/mana_bar_fill_regen" : "textures/ui/mana_bar_fill",
+    `${name}: texture matches the regen flag`);
+  assert.deepEqual(control.size, [`${step * 2}%`, "100%"], `${name}: width matches the step`);
+  widths.add(step);
+  assert.ok(control.bindings.some((entry) => entry.binding_name === "#hud_title_text_string"),
+    `${name}: reads the title channel`);
+  assert.ok(control.bindings.some((entry) => String(entry.source_property_name).includes("'MM:'")),
+    `${name}: strips the service marker from the title string`);
 }
-const barFill = findControl(barPanel, "mana_bar_fill");
-assert.ok(barFill, "fill image is defined inline");
-assert.equal(barFill.clip_direction, "left");
-assert.ok(barFill.bindings.some((entry) => entry.binding_name === "#hud_title_text_string"),
-  "fill reads the title channel");
-assert.ok(barFill.bindings.some((entry) => entry.target_property_name === "#clip_ratio"),
-  "fill is clipped by the published ratio");
-assert.ok(barFill.bindings.some((entry) => String(entry.source_property_name).includes("'MM:'")),
-  "fill strips the service marker from the title string");
+assert.equal(widths.size, STEPS, "every step from 1 to 50 has its own fill image");
+// Имена контролов внутри одного родителя обязаны быть уникальны.
+const fillNames = fills.map((item) => Object.keys(item)[0]);
+assert.equal(new Set(fillNames).size, fillNames.length, "fill control names are unique");
 
 // Текстуры рисуются 1:1 с панелью, иначе рамка размывается при растяжении.
 for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
@@ -543,20 +562,88 @@ for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
   assert.equal(data.readUInt32BE(16), 200, `${name}.png is 200 px wide, same as the bar`);
   assert.equal(data.readUInt32BE(20), 5, `${name}.png is 5 px tall`);
 }
+
+// Сердца, броня, голод, пузыри и сердца лошади: ванильные элементы скрыты, а
+// вместо них вставлены свои копии на 7 UI px выше (было -40).
+// Почему так: править экземпляр через replace с якорем where.control_name
+// движок отказался — в клиенте v1.0.10 сердца и голод остались на месте.
+for (const base of ["heart_renderer", "hunger_renderer", "armor_renderer", "bubbles_renderer",
+  "horse_heart_renderer", "progress_text_label"]) {
+  const mod = hud[base].modifications[0];
+  assert.equal(mod.array_name, "bindings", `${base}: hidden through a binding`);
+  assert.equal(mod.operation, "insert_back");
+  assert.equal(mod.value.binding_name, "(0)", `${base}: vanilla control is hidden`);
+  assert.equal(mod.value.binding_name_override, "#visible");
+}
+for (const [container, hungerX] of [
+  ["centered_gui_elements_at_bottom_middle", 180],
+  ["centered_gui_elements_at_bottom_middle_touch", 200]
+]) {
+  const inserted = hud[container].modifications[0].value;
+  const widgets = Object.fromEntries(inserted.map((item) => {
+    const [name, control] = Object.entries(item)[0];
+    return [name, control];
+  }));
+  assert.deepEqual(widgets.mana_heart_rend.offset, [-1, -47], `${container}: hearts lifted by 7 UI px`);
+  assert.deepEqual(widgets.mana_hunger_rend.offset, [hungerX, -47],
+    `${container}: hunger lifted by 7 UI px`);
+  assert.deepEqual(widgets.mana_armor_rend.offset, [-1, -47], `${container}: armor follows the hearts`);
+  assert.deepEqual(widgets.mana_bubbles_rend_0.offset, [hungerX, -57], `${container}: bubbles lifted`);
+  assert.deepEqual(widgets.mana_horse_heart_rend_0.offset, [hungerX, -63],
+    `${container}: horse hearts lifted`);
+  assert.equal(widgets.mana_heart_rend.renderer, "heart_renderer", `${container}: custom renderer kept`);
+  assert.equal(widgets.mana_hunger_rend.renderer, "hunger_renderer", `${container}: custom renderer kept`);
+}
+// Классическая раскладка (сердца слева сверху, голод справа): она базовые
+// элементы тоже использует, поэтому копии вставляем на прежних местах.
+const classic = Object.fromEntries(
+  hud.not_centered_gui_elements.modifications[0].value.map((item) => Object.entries(item)[0])
+);
+assert.deepEqual(classic.mana_heart_rend.offset, [2, 2], "classic layout keeps its hearts");
+assert.deepEqual(classic.mana_hunger_rend.offset, [-2, 2], "classic layout keeps its hunger");
+
+// Цифра уровня опыта: ванильная подпись стояла по центру над полосой опыта и
+// попадала ровно под полосу маны, поэтому свою копию уносим влево, на уровень
+// полосы. В обычной раскладке родитель размера "100%c" — там копия без смещения.
+const pocketLevel = hud["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]
+  .modifications[0].value[0].mana_level_text;
+assert.deepEqual(pocketLevel.offset, [-107, 5], "level number sits left of the xp bar, level with it");
+assert.equal(pocketLevel.type, "label");
+assert.equal(pocketLevel.text, "#level_number", "own copy shows the vanilla level number");
+for (const parent of ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
+  "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar"]) {
+  const label = hud[parent].modifications[0].value[0].mana_level_text;
+  assert.deepEqual(label.offset, [0, 0], `${parent}: level number stays where vanilla put it`);
+  assert.equal(label.size, undefined, `${parent}: no size inside a content-sized parent`);
+}
+
 // Наш служебный заголовок не должен быть виден игроку.
 const titleMod = hud["hud_title_text/title_frame/title"].modifications[0];
 assert.equal(titleMod.value.target_property_name, "#visible", "service title is hidden from the player");
 assert.ok(source.includes('"MM:"'), "script and UI use the same marker");
 
+// Значение публикуется шагом 0..50 (+1000 при ускоренном восстановлении).
+function publishedValue(text) {
+  assert.ok(text.startsWith("MM:"), `${text} starts with the service marker`);
+  return text.slice(3).replace(/^0/, "");
+}
+
 titles.length = 0;
 playerProps.set("mana:value", 500);
 playerProps.set("mana:regen_ticks", 0);
 context.publishManaBar(player, true);
-assert.equal(titles.at(-1).text, "MM:500", "half of the mana is published as 500/1000");
+assert.equal(publishedValue(titles.at(-1).text), "25", "500 of 1000 mana is published as step 25 of 50");
+
+// Движок обновляет #hud_title_text_string, только когда строка меняется, иначе
+// на постоянном значении полоса застывает пустой. Ведущий ноль это лечит.
+const firstText = titles.at(-1).text;
+context.publishManaBar(player, true);
+assert.notEqual(titles.at(-1).text, firstText, "every publication changes the title string");
+assert.equal(publishedValue(titles.at(-1).text), "25", "and keeps the same value");
 
 playerProps.set("mana:regen_ticks", 120);
 context.publishManaBar(player, true);
-assert.equal(titles.at(-1).text, "MM:10500", "regen flag is encoded in the same number");
+assert.equal(publishedValue(titles.at(-1).text), "1025", "regen adds 1000 to the published step");
 
 const publishedCount = titles.length;
 context.publishManaBar(player, false);
@@ -564,7 +651,7 @@ assert.equal(titles.length, publishedCount, "unchanged value is not republished 
 
 playerProps.set("mana:value", 1000);
 context.publishManaBar(player, false);
-assert.equal(titles.at(-1).text, "MM:11000", "changed value is republished");
+assert.equal(publishedValue(titles.at(-1).text), "1050", "full mana is the last step, with regen");
 
 titles.length = 0;
 playerProps.set("mana:value", 250);
@@ -572,6 +659,6 @@ playerProps.set("mana:regen_ticks", 0);
 context.tickPlayers();
 const published = titles.map((entry) => entry.text).filter((text) => text.startsWith("MM:"));
 assert.equal(published.length, 1, "player tick publishes the bar value once");
-assert.equal(published[0], "MM:250", "player tick publishes the current mana");
+assert.equal(publishedValue(published[0]), "13", "250 of 1000 mana is published as step 13");
 
 console.log("runtime-smoke: OK");

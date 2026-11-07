@@ -16,11 +16,13 @@ const DISPLAY_VERSION_KEY = "mana:display_version";
 const DISPLAY_LAYOUT_VERSION = 2;
 // Полоса маны в HUD (RP ui/hud_screen.json) не имеет доступа к скриптовым данным:
 // единственный канал, который читает JSON UI — это строка заголовка
-// (#hud_title_text_string). Значение передаём маркером "MM:<0..1000>",
-// при активном восстановлении прибавляем MANA_BAR_REGEN_OFFSET.
+// (#hud_title_text_string). Значение передаём маркером "MM:<шаг>", где шаг
+// 0..MANA_BAR_STEPS — доля маны, при активном восстановлении прибавляем
+// MANA_BAR_REGEN_OFFSET (заливка рисуется другой текстурой).
 // Сам заголовок скрываем в RP, если строка начинается с маркера.
 const MANA_BAR_MARK = "MM:";
-const MANA_BAR_REGEN_OFFSET = 10000;
+const MANA_BAR_STEPS = 50;
+const MANA_BAR_REGEN_OFFSET = 1000;
 const MANA_BAR_STAY_TICKS = 72000;
 const MANA_BAR_HEARTBEAT = 60;
 const MACHINE_IDS = new Set(["mana:condenser", "mana:anvil", "mana:fusion"]);
@@ -273,22 +275,29 @@ function showError(player, message) {
   player.playSound("note.bass");
 }
 
-// Значение для полоски маны: 0..1000 — доля маны, +10000 — идёт ускоренное
-// восстановление (полоса рисуется другой текстурой).
+// Значение для полоски маны: 0..MANA_BAR_STEPS — доля маны (заливка в UI —
+// набор картинок, по одной на шаг), +MANA_BAR_REGEN_OFFSET — идёт ускоренное
+// восстановление (заливка рисуется другой текстурой).
 function manaBarValue(player) {
-  const ratio = Math.round((getMana(player) / MAX_MANA) * 1000);
+  const ratio = Math.round((getMana(player) / MAX_MANA) * MANA_BAR_STEPS);
   const regen = Number(player.getDynamicProperty(REGEN_KEY) || 0) > 0 ? MANA_BAR_REGEN_OFFSET : 0;
-  return Math.max(0, Math.min(1000, ratio)) + regen;
+  return Math.max(0, Math.min(MANA_BAR_STEPS, ratio)) + regen;
 }
 
 function publishManaBar(player, force = false) {
   const value = manaBarValue(player);
-  if (!force && manaBarPublished.get(player.id) === value) return;
+  const previous = manaBarPublished.get(player.id);
+  if (!force && previous && previous.value === value) return;
+  // Движок обновляет #hud_title_text_string, только когда строка заголовка
+  // меняется: при постоянном значении полоса застывала пустой. Поэтому к
+  // каждой публикации добавляем меняющийся ведущий ноль — число от него не
+  // меняется, а строка другая.
+  const wobble = previous && previous.wobble ? 0 : 1;
   // Карта растёт только от числа разных значений, но всё равно подчищаем её.
   if (manaBarPublished.size > 256) manaBarPublished.clear();
-  manaBarPublished.set(player.id, value);
+  manaBarPublished.set(player.id, { value, wobble });
   try {
-    player.onScreenDisplay.setTitle(`${MANA_BAR_MARK}${value}`, {
+    player.onScreenDisplay.setTitle(`${MANA_BAR_MARK}${wobble ? "0" : ""}${value}`, {
       fadeInDuration: 0, stayDuration: MANA_BAR_STAY_TICKS, fadeOutDuration: 0
     });
   } catch (error) {

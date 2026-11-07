@@ -2835,6 +2835,32 @@
         }
        ]
       }
+     },
+     {
+      "mana_level_text": {
+       "type": "label",
+       "shadow": true,
+       "text": "#level_number",
+       "color": "$experience_text_color",
+       "anchor_from": "bottom_middle",
+       "anchor_to": "bottom_middle",
+       "offset": [
+        -107,
+        26
+       ],
+       "layer": 8,
+       "bindings": [
+        {
+         "binding_name": "#level_number",
+         "binding_type": "global"
+        },
+        {
+         "binding_name": "#level_number_visible",
+         "binding_type": "global",
+         "binding_name_override": "#visible"
+        }
+       ]
+      }
      }
     ]
    }
@@ -2845,10 +2871,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -2857,10 +2896,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -2869,10 +2921,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -2881,10 +2946,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -2893,10 +2971,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -2905,10 +2996,23 @@
    {
     "array_name": "bindings",
     "operation": "insert_back",
-    "value": {
-     "binding_name": "(0)",
-     "binding_name_override": "#visible"
-    }
+    "value": [
+     {
+      "binding_name": "#hud_title_text_string",
+      "binding_name_override": "#mana_raw",
+      "binding_type": "global"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "((#mana_raw - 'MM:') + 0)",
+      "target_property_name": "#mana_value"
+     },
+     {
+      "binding_type": "view",
+      "source_property_name": "(#mana_value = 99999)",
+      "target_property_name": "#visible"
+     }
+    ]
    }
   ]
  },
@@ -3393,114 +3497,6 @@
        "bindings": [
         {
          "binding_name": "#is_riding_bubbles",
-         "binding_name_override": "#visible"
-        }
-       ]
-      }
-     }
-    ]
-   }
-  ]
- },
- "exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar": {
-  "modifications": [
-   {
-    "array_name": "controls",
-    "operation": "insert_back",
-    "value": [
-     {
-      "mana_level_text": {
-       "type": "label",
-       "shadow": true,
-       "text": "#level_number",
-       "color": "$experience_text_color",
-       "anchor_from": "top_middle",
-       "anchor_to": "bottom_middle",
-       "offset": [
-        -107,
-        5
-       ],
-       "layer": 7,
-       "bindings": [
-        {
-         "binding_name": "#level_number",
-         "binding_type": "global"
-        },
-        {
-         "binding_name": "#level_number_visible",
-         "binding_type": "global",
-         "binding_name_override": "#visible"
-        }
-       ]
-      }
-     }
-    ]
-   }
-  ]
- },
- "exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar": {
-  "modifications": [
-   {
-    "array_name": "controls",
-    "operation": "insert_back",
-    "value": [
-     {
-      "mana_level_text": {
-       "type": "label",
-       "shadow": true,
-       "text": "#level_number",
-       "color": "$experience_text_color",
-       "anchor_from": "top_middle",
-       "anchor_to": "bottom_middle",
-       "offset": [
-        0,
-        0
-       ],
-       "layer": 7,
-       "bindings": [
-        {
-         "binding_name": "#level_number",
-         "binding_type": "global"
-        },
-        {
-         "binding_name": "#level_number_visible",
-         "binding_type": "global",
-         "binding_name_override": "#visible"
-        }
-       ]
-      }
-     }
-    ]
-   }
-  ]
- },
- "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar": {
-  "modifications": [
-   {
-    "array_name": "controls",
-    "operation": "insert_back",
-    "value": [
-     {
-      "mana_level_text": {
-       "type": "label",
-       "shadow": true,
-       "text": "#level_number",
-       "color": "$experience_text_color",
-       "anchor_from": "top_middle",
-       "anchor_to": "bottom_middle",
-       "offset": [
-        0,
-        0
-       ],
-       "layer": 7,
-       "bindings": [
-        {
-         "binding_name": "#level_number",
-         "binding_type": "global"
-        },
-        {
-         "binding_name": "#level_number_visible",
-         "binding_type": "global",
          "binding_name_override": "#visible"
         }
        ]

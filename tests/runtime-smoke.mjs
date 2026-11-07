@@ -471,30 +471,11 @@ assert.equal(hud.namespace, undefined, "hud merge file must not declare its own 
 assert.ok(!hudText.includes("$mana_bar_offset"), "no $ variables inside modified subtrees");
 
 // Регрессия: внутри цепочки ванильной полосы опыта родители размера "100%c"
-// (по содержимому), и дочерняя ширина "100%" даёт круговую зависимость: панель
-// схлопывается и ломает раскладку. Вставлять туда можно только контролы без
-// собственного размера (подпись сама считает размер по тексту).
-for (const [parent, controls] of [
-  ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
-    hud["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar"]],
-  ["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar",
-    hud["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]]
-]) {
-  for (const entry of controls.modifications) {
-    for (const item of entry.value) {
-      for (const [name, control] of Object.entries(item)) {
-        assert.equal(control.size, undefined, `${parent}/${name} must not set its own size`);
-      }
-    }
-  }
-}
-// Сами панели группы опыта не трогаем вообще.
-for (const banned of [
-  "exp_progress_bar_and_hotbar",
-  "exp_progress_bar_and_hotbar_pocket",
-  "exp_progress_bar_and_hotbar/resizing_hotbar_no_xp_bar"
-]) {
-  assert.equal(hud[banned], undefined, `${banned} must not be modified`);
+// (по содержимому), и любой ребёнок со смещением или своей шириной меняет
+// границы содержимого — вся группа опыта и хотбар уезжают. Поэтому группы
+// опыта не трогаем совсем, а свою цифру уровня кладём в root_panel.
+for (const banned of Object.keys(hud).filter((key) => key.startsWith("exp_"))) {
+  assert.fail(`${banned} must not be modified`);
 }
 
 function findControl(node, name) {
@@ -567,13 +548,22 @@ for (const name of ["mana_bar_empty", "mana_bar_fill", "mana_bar_fill_regen"]) {
 // вместо них вставлены свои копии на 7 UI px выше (было -40).
 // Почему так: править экземпляр через replace с якорем where.control_name
 // движок отказался — в клиенте v1.0.10 сердца и голод остались на месте.
+// Оригиналы скрываются тем же приёмом, что и заливка полосы: читаем строку
+// заголовка и сравниваем со значением, которого скрипт не публикует. Вид
+// {"binding_name": "(0)", "binding_name_override": "#visible"} в клиенте
+// не сработал — оригиналы сердец и голода остались видны поверх полосы.
 for (const base of ["heart_renderer", "hunger_renderer", "armor_renderer", "bubbles_renderer",
   "horse_heart_renderer", "progress_text_label"]) {
   const mod = hud[base].modifications[0];
   assert.equal(mod.array_name, "bindings", `${base}: hidden through a binding`);
   assert.equal(mod.operation, "insert_back");
-  assert.equal(mod.value.binding_name, "(0)", `${base}: vanilla control is hidden`);
-  assert.equal(mod.value.binding_name_override, "#visible");
+  const bindings = mod.value;
+  assert.equal(bindings.length, 3, `${base}: same channel as the bar fills`);
+  assert.equal(bindings[0].binding_name, "#hud_title_text_string", `${base}: reads the title channel`);
+  const visible = bindings[2];
+  assert.equal(visible.target_property_name, "#visible", `${base}: visibility is overridden`);
+  const never = Number(visible.source_property_name.match(/= (\d+)\)/)[1]);
+  assert.ok(never > 1050, `${base}: hides on a value the script never publishes`);
 }
 for (const [container, hungerX] of [
   ["centered_gui_elements_at_bottom_middle", 180],
@@ -603,19 +593,18 @@ assert.deepEqual(classic.mana_heart_rend.offset, [2, 2], "classic layout keeps i
 assert.deepEqual(classic.mana_hunger_rend.offset, [-2, 2], "classic layout keeps its hunger");
 
 // Цифра уровня опыта: ванильная подпись стояла по центру над полосой опыта и
-// попадала ровно под полосу маны, поэтому свою копию уносим влево, на уровень
-// полосы. В обычной раскладке родитель размера "100%c" — там копия без смещения.
-const pocketLevel = hud["exp_progress_bar_and_hotbar_pocket/resizing_xp_bar_with_hotbar"]
-  .modifications[0].value[0].mana_level_text;
-assert.deepEqual(pocketLevel.offset, [-107, 5], "level number sits left of the xp bar, level with it");
-assert.equal(pocketLevel.type, "label");
-assert.equal(pocketLevel.text, "#level_number", "own copy shows the vanilla level number");
-for (const parent of ["exp_progress_bar_and_hotbar/resizing_xp_bar_with_hotbar",
-  "exp_progress_bar_and_hotbar_pocket/resizing_locator_bar"]) {
-  const label = hud[parent].modifications[0].value[0].mana_level_text;
-  assert.deepEqual(label.offset, [0, 0], `${parent}: level number stays where vanilla put it`);
-  assert.equal(label.size, undefined, `${parent}: no size inside a content-sized parent`);
-}
+// попадала ровно под полосу маны. Свою копию кладём в root_panel — вне групп
+// опыта — и привязываем к низу экрана: полоса опыта занимает 26.3..31.1 UI px,
+// значит низ подписи на 26 UI px даёт центр ровно на уровне полосы.
+const levelLabel = hud.root_panel.modifications[0].value[1].mana_level_text;
+assert.equal(levelLabel.type, "label");
+assert.equal(levelLabel.text, "#level_number", "own copy shows the vanilla level number");
+assert.equal(levelLabel.color, "$experience_text_color", "own copy keeps the vanilla colour");
+assert.equal(levelLabel.anchor_from, "bottom_middle", "own copy is anchored to the screen bottom");
+assert.equal(levelLabel.anchor_to, "bottom_middle");
+assert.deepEqual(levelLabel.offset, [-107, 26], "level number sits left of the xp bar, level with it");
+assert.ok(levelLabel.bindings.some((entry) => entry.binding_name === "#level_number_visible"),
+  "own copy is visible exactly when vanilla shows the level");
 
 // Наш служебный заголовок не должен быть виден игроку.
 const titleMod = hud["hud_title_text/title_frame/title"].modifications[0];

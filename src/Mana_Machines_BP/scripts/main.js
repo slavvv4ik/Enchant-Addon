@@ -705,6 +705,7 @@ function tickPlayers() {
     }
     // Значение публикуем только при изменении; раз в MANA_BAR_HEARTBEAT тиков
     // шлём принудительно, если движок успел очистить строку заголовка.
+    publishManaApi(player);
     publishManaBar(player, system.currentTick % MANA_BAR_HEARTBEAT === 0);
   }
 }
@@ -1003,3 +1004,108 @@ system.runInterval(() => {
     }
   }
 }, 1);
+
+// --- Внешний API маны для других аддонов ---
+// Dynamic properties привязаны к UUID бихевиор-пака: чужой аддон не увидит
+// "mana:value" через player.getDynamicProperty, даже зная ключ. Единственный
+// штатный канал между аддонами — скриптовые события, поэтому ману отдаём и
+// принимаем через них. ID события обязан быть с неймспейсом, но не minecraft.
+//
+// Входящие:  mana:get | mana:set <n> | mana:add <n> | mana:spend <n>
+// Исходящие: mana:balance (ответ на get/set/add), mana:result (ответ на spend),
+//            mana:changed (рассылка, когда значение изменилось)
+// Сообщение — JSON вида {"player":"Steve","amount":50}, где player — имя или
+// id игрока. Из чата удобнее короткая форма "/scriptevent mana:spend 50":
+// тогда игрок берётся из sourceEntity, а всё сообщение считается суммой.
+const MANA_API_GET = "mana:get";
+const MANA_API_SET = "mana:set";
+const MANA_API_ADD = "mana:add";
+const MANA_API_SPEND = "mana:spend";
+const MANA_API_BALANCE = "mana:balance";
+const MANA_API_RESULT = "mana:result";
+const MANA_API_CHANGED = "mana:changed";
+const MANA_API_EVENTS = new Set([MANA_API_GET, MANA_API_SET, MANA_API_ADD, MANA_API_SPEND]);
+// Какая мана была разослана наружу: событие шлём только при изменении.
+const manaApiLast = new Map();
+
+function parseApiMessage(raw) {
+  if (typeof raw !== "string" || raw === "") return { target: undefined, amount: undefined };
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    // Нам прислали не JSON — значит это просто число ("/scriptevent mana:add 25").
+    return { target: undefined, amount: raw };
+  }
+  if (parsed === null || typeof parsed !== "object") return { target: undefined, amount: parsed };
+  return { target: parsed.player ?? parsed.id, amount: parsed.amount ?? parsed.value };
+}
+
+function apiPlayer(raw) {
+  if (typeof raw !== "string" || raw === "") return undefined;
+  try {
+    const byId = world.getEntity(raw);
+    if (byId) return byId;
+  } catch {}
+  try {
+    return world.getPlayers({ name: raw })[0];
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * @param {import("@minecraft/server").Player} player
+ * @param {Record<string, unknown>} extra
+ */
+function apiPayload(player, extra) {
+  return JSON.stringify({ player: player.name, id: player.id, max: MAX_MANA, ...extra });
+}
+
+system.afterEvents.scriptEventReceive.subscribe((event) => {
+  if (!MANA_API_EVENTS.has(event.id)) return;
+  const request = parseApiMessage(event.message);
+  const target = /** @type {import("@minecraft/server").Player} */ (
+    apiPlayer(request.target) ?? event.sourceEntity ?? event.initiator
+  );
+  if (target?.typeId !== "minecraft:player") return;
+  const amount = Number(request.amount);
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  switch (event.id) {
+    case MANA_API_GET:
+      system.sendScriptEvent(MANA_API_BALANCE, apiPayload(target, { mana: getMana(target) }));
+      break;
+    case MANA_API_SET:
+      setMana(target, safeAmount);
+      system.sendScriptEvent(MANA_API_BALANCE, apiPayload(target, { mana: getMana(target) }));
+      break;
+    case MANA_API_ADD:
+      setMana(target, getMana(target) + safeAmount);
+      system.sendScriptEvent(MANA_API_BALANCE, apiPayload(target, { mana: getMana(target) }));
+      break;
+    case MANA_API_SPEND: {
+      const have = getMana(target);
+      const cost = Math.max(0, Math.floor(safeAmount));
+      if (have < cost) {
+        // Не хватает — баланс не трогаем, просто сообщаем, сколько нужно.
+        system.sendScriptEvent(MANA_API_RESULT, apiPayload(target, { ok: false, mana: have, need: cost }));
+        break;
+      }
+      setMana(target, have - cost);
+      system.sendScriptEvent(MANA_API_RESULT, apiPayload(target, { ok: true, mana: getMana(target), spent: cost }));
+      break;
+    }
+  }
+}, { namespaces: ["mana"] });
+
+// Рассылка наружу: другим аддонам не нужно опрашивать баланс каждый тик,
+// достаточно подписаться на mana:changed. Шлём только при изменении значения.
+function publishManaApi(player) {
+  const mana = getMana(player);
+  if (manaApiLast.get(player.id) === mana) return;
+  manaApiLast.set(player.id, mana);
+  system.sendScriptEvent(MANA_API_CHANGED, apiPayload(player, {
+    mana,
+    regen: Number(player.getDynamicProperty(REGEN_KEY) || 0) > 0
+  }));
+}
